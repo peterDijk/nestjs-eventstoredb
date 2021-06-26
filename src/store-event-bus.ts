@@ -12,7 +12,7 @@ export class StoreEventBus implements IEventBus {
   ) {}
 
   publish<T extends IEvent>(event: T): void {
-    const storableEvent = (event as any) as StorableEvent;
+    const storableEvent = event as any as StorableEvent;
     if (
       storableEvent.id === undefined ||
       storableEvent.eventAggregate === undefined ||

@@ -1,27 +1,37 @@
 import { StorableEvent } from './interfaces/storable-event';
+import { EventSourcingOptions } from './interfaces';
 import * as eventstore from 'eventstore';
 import * as url from 'url';
 
 export class EventStore {
   private readonly eventstore;
+  private readonly config;
   private eventStoreLaunched = false;
 
-  constructor(mongoURL: string) {
+  constructor(options: EventSourcingOptions) {
     let ssl = false;
 
-    const parsed = url.parse(mongoURL, true);
+    this.config = options.aggregateSnapshot || {};
 
-    if (parsed.query && parsed.query.ssl !== undefined && parsed.query.ssl === 'true') {
+    const parsed = url.parse(options.mongoURL, true);
+
+    if (
+      parsed.query &&
+      parsed.query.ssl !== undefined &&
+      parsed.query.ssl === 'true'
+    ) {
       ssl = true;
     }
 
     this.eventstore = eventstore({
       type: 'mongodb',
-      url: mongoURL,
+      url: options.mongoURL,
+      maxSnapshotsCount: options.maxSnapshots,
       options: {
         ssl: ssl,
       },
     });
+
     this.eventstore.init(err => {
       if (err) {
         throw err;
@@ -34,20 +44,51 @@ export class EventStore {
     return this.eventStoreLaunched;
   }
 
-  public async getEvents(
+  public getSnapshotInterval(aggregate: string): number | null {
+    return this.config ? this.config[aggregate] : null;
+  }
+
+  public async createSnapshot(
     aggregate: string,
     id: string,
-  ): Promise<StorableEvent[]> {
-    return new Promise<StorableEvent[]>(resolve => {
+    revision: number,
+    state: string,
+  ): Promise<any> {
+    return new Promise<any>(resolve => {
+      this.eventstore.createSnapshot(
+        {
+          streamId: this.getAggregateId(aggregate, id),
+          data: state,
+          revision: revision,
+        },
+        function (err) {
+          // snapshot saved
+        },
+      );
+    });
+  }
+
+  public async getEventsFromSnapshot(
+    aggregate: string,
+    id: string,
+  ): Promise<{ events: StorableEvent[]; snapshot: any; lastRevision: number }> {
+    return new Promise<{
+      events: StorableEvent[];
+      snapshot: any;
+      lastRevision: number;
+    }>(resolve => {
       this.eventstore.getFromSnapshot(
-        this.getAgrregateId(aggregate, id),
+        this.getAggregateId(aggregate, id),
         (err, snapshot, stream) => {
-          // snapshot.data; // Snapshot
-          resolve(
-            stream.events.map(event =>
-              this.getStorableEventFromPayload(event.payload),
-            ),
-          );
+          const events = stream.events.map(event => {
+            return this.getStorableEventFromPayload(event.payload);
+          });
+
+          resolve({
+            events: events,
+            snapshot: snapshot?.data,
+            lastRevision: stream.lastRevision,
+          });
         },
       );
     });
@@ -73,7 +114,7 @@ export class EventStore {
       }
       this.eventstore.getEventStream(
         {
-          aggregateId: this.getAgrregateId(event.eventAggregate, event.id),
+          aggregateId: this.getAggregateId(event.eventAggregate, event.id),
           aggregate: event.eventAggregate,
         },
         (err, stream) => {
@@ -81,6 +122,7 @@ export class EventStore {
             reject(err);
             return;
           }
+
           stream.addEvent(event);
           stream.commit(commitErr => {
             if (commitErr) {
@@ -96,12 +138,14 @@ export class EventStore {
   // Monkey patch to obtain event 'instances' from db
   private getStorableEventFromPayload(payload: any): StorableEvent {
     const eventPlain = payload;
-    eventPlain.constructor = { name: eventPlain.eventName };
+    eventPlain.constructor = {
+      name: eventPlain.eventName,
+    };
 
     return Object.assign(Object.create(eventPlain), eventPlain);
   }
 
-  private getAgrregateId(aggregate: string, id: string): string {
+  private getAggregateId(aggregate: string, id: string): string {
     return aggregate + '-' + id;
   }
 }

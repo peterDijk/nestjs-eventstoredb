@@ -1,3 +1,5 @@
 export interface EventSourcingOptions {
-    mongoURL: string;
+  mongoURL: string;
+  maxSnapshots: number;
+  aggregateSnapshot: { [key: string]: number };
 }

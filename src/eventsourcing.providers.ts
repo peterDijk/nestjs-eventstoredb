@@ -5,5 +5,11 @@ import { StoreEventPublisher } from './store-event-publisher';
 import { AggregateRepository } from './aggregate-repository';
 
 export function createEventSourcingProviders() {
-  return [ViewUpdater, ViewEventBus, StoreEventBus, StoreEventPublisher, AggregateRepository];
+  return [
+    ViewUpdater,
+    ViewEventBus,
+    StoreEventBus,
+    StoreEventPublisher,
+    AggregateRepository,
+  ];
 }

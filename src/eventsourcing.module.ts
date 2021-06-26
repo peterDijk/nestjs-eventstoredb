@@ -1,4 +1,4 @@
-import { Module, DynamicModule, Scope } from '@nestjs/common';
+import { Module, DynamicModule } from '@nestjs/common';
 import { EventSourcingOptions } from './interfaces';
 import { CqrsModule } from '@nestjs/cqrs';
 import { EventStore } from './eventstore';
@@ -12,7 +12,7 @@ export class EventSourcingModule {
       providers: [
         {
           provide: EventStore,
-          useValue: new EventStore(options.mongoURL),
+          useValue: new EventStore(options),
         },
       ],
       exports: [EventStore],

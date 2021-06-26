@@ -3,5 +3,5 @@
   "arrowParens": "avoid",
   "trailingComma": "all",
   "useTabs": false,
-  "tabWith": 2
+  "tabWidth": 2
 }
