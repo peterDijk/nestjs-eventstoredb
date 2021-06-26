@@ -68,7 +68,7 @@ export class EventStore {
     });
   }
 
-  public async getEventsFromSnapshot(
+  public async getEvents(
     aggregate: string,
     id: string,
   ): Promise<{ events: StorableEvent[]; snapshot: any; lastRevision: number }> {

@@ -15,8 +15,10 @@ export class AggregateRepository {
     aggregateName: string,
     aggregateId: string,
   ): Promise<T | null> {
-    const { events, snapshot, lastRevision } =
-      await this.eventStore.getEventsFromSnapshot(aggregateName, aggregateId);
+    const { events, snapshot, lastRevision } = await this.eventStore.getEvents(
+      aggregateName,
+      aggregateId,
+    );
 
     if (!events || events.length === 0) {
       return null;
