@@ -1,7 +1,7 @@
 {
   "name": "@berniemac/event-sourcing-nestjs",
-  "version": "1.1.4",
-  "description": "NestJS module for implementing Event Sourcing.",
+  "version": "1.1.5",
+  "description": "NestJS module for implementing Event Sourcing with Snapshots.",
   "main": "index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
