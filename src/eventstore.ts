@@ -81,7 +81,7 @@ export class EventStore {
         this.getAggregateId(aggregate, id),
         (err, snapshot, stream) => {
           const events = stream.events.map(event => {
-            return this.getStorableEventFromPayload(event.payload);
+            return this.getStorableEventFromPayload(event);
           });
 
           resolve({
@@ -98,7 +98,7 @@ export class EventStore {
     return new Promise<StorableEvent>((resolve, reject) => {
       this.eventstore.getEvents(index, 1, (err, events) => {
         if (events.length > 0) {
-          resolve(this.getStorableEventFromPayload(events[0].payload));
+          resolve(this.getStorableEventFromPayload(events[0]));
         } else {
           resolve(null);
         }
@@ -136,13 +136,21 @@ export class EventStore {
   }
 
   // Monkey patch to obtain event 'instances' from db
-  private getStorableEventFromPayload(payload: any): StorableEvent {
+  private getStorableEventFromPayload(event: any): StorableEvent {
+    const { payload } = event;
     const eventPlain = payload;
     eventPlain.constructor = {
       name: eventPlain.eventName,
     };
 
-    return Object.assign(Object.create(eventPlain), eventPlain);
+    const transformedEvent = Object.assign(
+      Object.create(eventPlain),
+      eventPlain,
+    );
+    transformedEvent.meta = {
+      revision: event.streamRevision,
+    };
+    return transformedEvent;
   }
 
   private getAggregateId(aggregate: string, id: string): string {
