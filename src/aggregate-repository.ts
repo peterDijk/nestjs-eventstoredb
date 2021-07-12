@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Type } from './metadata';
 import { EventStore } from './eventstore';
-import { IAggregateRoot } from './interfaces';
 import { AggregateRoot } from '@nestjs/cqrs';
 
 @Injectable()
@@ -10,7 +9,7 @@ export class AggregateRepository {
     private readonly eventStore: EventStore, // private readonly options?: any,
   ) {}
 
-  async getById<T extends AggregateRoot & IAggregateRoot>(
+  async getById<T extends AggregateRoot>(
     type: Type<T>,
     aggregateName: string,
     aggregateId: string,
@@ -31,12 +30,16 @@ export class AggregateRepository {
       this.eventStore.getSnapshotInterval(aggregateName);
 
     if (performSnapshotAt && events.length > performSnapshotAt) {
-      this.eventStore.createSnapshot(
-        aggregateName,
-        aggregateId,
-        lastRevision,
-        aggregate.state,
-      );
+      const state = (aggregate as any).state;
+
+      if (state) {
+        this.eventStore.createSnapshot(
+          aggregateName,
+          aggregateId,
+          lastRevision,
+          state,
+        );
+      }
     }
 
     return aggregate;
