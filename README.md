@@ -2,7 +2,7 @@
 
 # WORK IN PROGRESS!!! PUBLISHED FOR DOCKER REASONS..
 
-[![](https://badgen.net/npm/v/event-sourcing-nestjs)](https://www.npmjs.com/package/event-sourcing-nestjs) ![](https://badgen.net/npm/dt/event-sourcing-nestjs)
+<!-- [![](https://badgen.net/npm/v/event-sourcing-nestjs)](https://www.npmjs.com/package/event-sourcing-nestjs) ![](https://badgen.net/npm/dt/event-sourcing-nestjs) -->
 
 Library that implements event sourcing using NestJS and his CQRS library.
 
