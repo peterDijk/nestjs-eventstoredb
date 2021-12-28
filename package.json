@@ -10,9 +10,7 @@
     "prettier": "prettier --write 'src/*.{ts, js}'"
   },
   "dependencies": {
-    "@eventstore/db-client": "^2.1.1",
-    "eventstore": "^1.15.5",
-    "mongodb": "^3.5.2"
+    "@eventstore/db-client": "^2.1.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.4",
