@@ -12,12 +12,10 @@ import { StoreEventPublisher } from './store-event-publisher';
   imports: [CqrsModule],
   providers: [EventStoreEventSubscriber], // needed??
 })
-export class EventSourcingModule {
-  private logger = new Logger(EventSourcingModule.name);
-
+export class EventStoreModule {
   static forRoot(options: EventSourcingOptions): DynamicModule {
     return {
-      module: EventSourcingModule,
+      module: EventStoreModule,
       providers: [
         {
           provide: EventStore,
@@ -34,7 +32,7 @@ export class EventSourcingModule {
     eventSerializers: EventSerializers;
   }): Promise<DynamicModule> {
     return {
-      module: EventSourcingModule,
+      module: EventStoreModule,
       imports: [CqrsModule],
       providers: [
         ViewUpdater,
