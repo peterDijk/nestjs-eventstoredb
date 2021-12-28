@@ -1,6 +1,6 @@
 import { IEvent, IMessageSource } from '@nestjs/cqrs';
 import { Subject } from 'rxjs';
-import { EventStore } from './EventStore';
+import { EventStore } from './eventstore';
 import { ViewEventBus } from './view';
 export declare class EventStoreEventSubscriber implements IMessageSource {
     private readonly eventStore;

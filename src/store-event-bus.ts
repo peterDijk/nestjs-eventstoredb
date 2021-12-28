@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { IEvent, IEventBus } from '@nestjs/cqrs/dist/interfaces';
-import { EventStore } from './EventStore';
-import { EventSerializers, StorableEvent } from './Interfaces';
+import { EventStore } from './eventstore';
+import { EventSerializers, StorableEvent } from './interfaces';
 import { EventStoreEventSubscriber } from './store-event-subscriber';
 import { ViewEventBus } from './view';
 
