@@ -1,8 +1,8 @@
 import { ModuleRef } from '@nestjs/core';
 import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { IEvent, IEventBus } from '@nestjs/cqrs/dist/interfaces';
-import { EventStore } from './EventStore';
-import { EventSerializers } from './Interfaces';
+import { EventStore } from './eventstore';
+import { EventSerializers } from './interfaces';
 import { ViewEventBus } from './view';
 export declare class StoreEventBus extends EventBus implements IEventBus {
     private readonly eventStore;

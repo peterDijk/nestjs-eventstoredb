@@ -22,7 +22,7 @@ exports.StoreEventBus = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const cqrs_1 = require("@nestjs/cqrs");
-const EventStore_1 = require("./EventStore");
+const eventstore_1 = require("./eventstore");
 const store_event_subscriber_1 = require("./store-event-subscriber");
 const view_1 = require("./view");
 let StoreEventBus = class StoreEventBus extends cqrs_1.EventBus {
@@ -59,7 +59,7 @@ StoreEventBus = __decorate([
     common_1.Injectable(),
     __metadata("design:paramtypes", [cqrs_1.CommandBus,
         core_1.ModuleRef,
-        EventStore_1.EventStore,
+        eventstore_1.EventStore,
         cqrs_1.EventBus,
         view_1.ViewEventBus, String, Object])
 ], StoreEventBus);

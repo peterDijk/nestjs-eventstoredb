@@ -1,6 +1,6 @@
 {
   "name": "@peterdijk/nestjs-eventstoredb",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "NestJS module for implementing Event Sourcing using EventStoreDB",
   "main": "index.js",
   "scripts": {
