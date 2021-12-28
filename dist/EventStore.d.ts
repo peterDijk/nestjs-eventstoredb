@@ -1,4 +1,4 @@
-import { EventSerializers, EventSourcingOptions } from './interfaces';
+import { EventSerializers, EventStoreOptions } from './interfaces';
 import { AppendExpectedRevision } from '@eventstore/db-client';
 import { IEvent } from '@nestjs/cqrs';
 import { Subject } from 'rxjs';
@@ -9,7 +9,7 @@ export declare class EventStore {
     private readonly config;
     eventStoreLaunched: boolean;
     private logger;
-    constructor(options: EventSourcingOptions);
+    constructor(options: EventStoreOptions);
     isInitiated(): boolean;
     setSerializers(aggregate: string, eventSerializers: EventSerializers): void;
     getEvents(aggregate: string, id: string): Promise<{

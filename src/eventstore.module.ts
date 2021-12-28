@@ -2,7 +2,7 @@ import { Module, DynamicModule, Logger } from '@nestjs/common';
 import { CommandBus, CqrsModule, EventBus } from '@nestjs/cqrs';
 import { ModuleRef } from '@nestjs/core';
 import { EventStoreEventSubscriber } from './store-event-subscriber';
-import { EventSerializers, EventSourcingOptions } from './interfaces';
+import { EventSerializers, EventStoreOptions } from './interfaces';
 import { EventStore } from './eventStore';
 import { ViewEventBus, ViewUpdater } from './view';
 import { StoreEventBus } from './store-event-bus';
@@ -10,10 +10,10 @@ import { StoreEventPublisher } from './store-event-publisher';
 
 @Module({
   imports: [CqrsModule],
-  providers: [EventStoreEventSubscriber], // needed??
+  providers: [EventStoreEventSubscriber],
 })
 export class EventStoreModule {
-  static forRoot(options: EventSourcingOptions): DynamicModule {
+  static forRoot(options: EventStoreOptions): DynamicModule {
     return {
       module: EventStoreModule,
       providers: [

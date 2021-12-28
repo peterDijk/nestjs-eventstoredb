@@ -1,4 +1,4 @@
-import { EventSerializers, EventSourcingOptions } from './interfaces';
+import { EventSerializers, EventStoreOptions } from './interfaces';
 import {
   AppendExpectedRevision,
   END,
@@ -24,7 +24,7 @@ export class EventStore {
 
   private logger = new Logger(EventStore.name);
 
-  constructor(options: EventSourcingOptions) {
+  constructor(options: EventStoreOptions) {
     try {
       this.eventstore = EventStoreDBClient.connectionString(
         options.eventStoreUrl,

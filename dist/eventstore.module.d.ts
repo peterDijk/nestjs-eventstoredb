@@ -1,7 +1,7 @@
 import { DynamicModule } from '@nestjs/common';
-import { EventSerializers, EventSourcingOptions } from './interfaces';
+import { EventSerializers, EventStoreOptions } from './interfaces';
 export declare class EventStoreModule {
-    static forRoot(options: EventSourcingOptions): DynamicModule;
+    static forRoot(options: EventStoreOptions): DynamicModule;
     static forFeature(options: {
         streamPrefix: string;
         eventSerializers: EventSerializers;
