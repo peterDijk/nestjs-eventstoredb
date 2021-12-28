@@ -49,12 +49,12 @@
     "ddd",
     "eventstoredb"
   ],
-  "author": "ArkerLabs//Should leave or can I change to Peter van Dijk?",
+  "author": "ArkerLabs//Peter van Dijk",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bernarma/event-sourcing-nestjs/issues"
+    "url": "https://github.com/peterDijk/nestjs-eventstoredb/issues"
   },
-  "homepage": "https://github.com/bernarma/event-sourcing-nestjs#readme",
+  "homepage": "https://github.com/peterDijk/nestjs-eventstoredb#readme",
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"

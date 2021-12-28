@@ -1,13 +1,6 @@
 # ✨ Event Sourcing for Nestjs using EventstoreDB
-forked from ...
 
-package.json scripts for publishing:
-```
-    "prepublish:npm": "npm run build",
-    "publish:npm": "npm publish --access public",
-    "prepublish:next": "npm run build",
-    "publish:next": "npm publish --access public --tag next",
-```
+# WORK IN PROGRESS!!! PUBLISHED FOR DOCKER REASONS..
 
 [![](https://badgen.net/npm/v/event-sourcing-nestjs)](https://www.npmjs.com/package/event-sourcing-nestjs) ![](https://badgen.net/npm/dt/event-sourcing-nestjs)
 
@@ -50,12 +43,12 @@ app.module.ts
 
 ```ts
 import { Module } from '@nestjs/common';
-import { EventSourcingModule } from 'event-sourcing-nestjs';
+import { EventStoreModule } from '@peterdijk/nestjs-eventstoredb';
 
 @Module({
   imports: [
     EventSourcingModule.forRoot({
-      mongoURL: 'mongodb://localhost:27017/eventstore',
+      ...
     }),
   ],
 })
@@ -66,10 +59,10 @@ Importing it in your modules
 
 ```ts
 import { Module } from '@nestjs/common';
-import { EventSourcingModule } from 'event-sourcing-nestjs';
+import { EventStoreModule } from '@peterdijk/nestjs-eventstoredb';
 
 @Module({
-  imports: [EventSourcingModule.forFeature()],
+  imports: [EventStoreModule.forFeature()],
 })
 export class UserModule {}
 ```
@@ -80,7 +73,6 @@ Your events must extend the abstract class StorableEvent.
 
 ```ts
 export class UserCreatedEvent extends StorableEvent {
-  eventAggregate = 'user';
   eventVersion = 1;
   id = '_id_';
 }
