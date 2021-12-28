@@ -1,8 +1,8 @@
 import { IEvent, IMessageSource } from '@nestjs/cqrs';
 import { Subject } from 'rxjs';
 import { EventStoreDBClient } from '@eventstore/db-client';
-import { Injectable, Logger } from '@nestjs/common';
-import { EventStore } from './EventStore';
+import { Logger } from '@nestjs/common';
+import { EventStore } from './eventstore';
 import { ViewEventBus } from './view';
 
 export class EventStoreEventSubscriber implements IMessageSource {

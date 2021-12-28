@@ -3,7 +3,7 @@ import { CommandBus, CqrsModule, EventBus } from '@nestjs/cqrs';
 import { ModuleRef } from '@nestjs/core';
 import { EventStoreEventSubscriber } from './store-event-subscriber';
 import { EventSerializers, EventStoreOptions } from './interfaces';
-import { EventStore } from './eventStore';
+import { EventStore } from './eventstore';
 import { ViewEventBus, ViewUpdater } from './view';
 import { StoreEventBus } from './store-event-bus';
 import { StoreEventPublisher } from './store-event-publisher';
