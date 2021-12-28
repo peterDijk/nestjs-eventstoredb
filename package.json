@@ -1,19 +1,16 @@
 {
-  "name": "@berniemac/event-sourcing-nestjs",
-  "version": "1.1.7",
-  "description": "NestJS module for implementing Event Sourcing with Snapshots.",
+  "name": "@peterdijk/nestjs-eventstoredb",
+  "version": "0.5.1",
+  "description": "NestJS module for implementing Event Sourcing using EventStoreDB",
   "main": "index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc -p tsconfig.json",
-    "prepublish:npm": "npm run build",
-    "publish:npm": "npm publish --access public",
-    "prepublish:next": "npm run build",
-    "publish:next": "npm publish --access public --tag next",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix && npm run prettier",
     "prettier": "prettier --write 'src/*.{ts, js}'"
   },
   "dependencies": {
+    "@eventstore/db-client": "^2.1.1",
     "eventstore": "^1.15.5",
     "mongodb": "^3.5.2"
   },
@@ -40,16 +37,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bernarma/event-sourcing-nestjs"
+    "url": "git+https://github.com/peterDijk/nestjs-eventstoredb"
   },
   "keywords": [
     "nestjs",
     "es",
     "eventsourcing",
     "cqrs",
-    "ddd"
+    "ddd",
+    "eventstoredb"
   ],
-  "author": "ArkerLabs",
+  "author": "ArkerLabs//Should leave or can I change to Peter van Dijk?",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/bernarma/event-sourcing-nestjs/issues"

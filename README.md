@@ -1,4 +1,13 @@
-# ✨ Event Sourcing for Nestjs
+# ✨ Event Sourcing for Nestjs using EventstoreDB
+forked from ...
+
+package.json scripts for publishing:
+```
+    "prepublish:npm": "npm run build",
+    "publish:npm": "npm publish --access public",
+    "prepublish:next": "npm run build",
+    "publish:next": "npm publish --access public --tag next",
+```
 
 [![](https://badgen.net/npm/v/event-sourcing-nestjs)](https://www.npmjs.com/package/event-sourcing-nestjs) ![](https://badgen.net/npm/dt/event-sourcing-nestjs)
 

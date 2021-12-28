@@ -1,5 +1,5 @@
+import { IEvent } from '@nestjs/cqrs/dist/interfaces';
+
 export interface EventSourcingOptions {
-  mongoURL: string;
-  maxSnapshots?: number;
-  aggregateSnapshot?: { [key: string]: number };
+  eventStoreUrl: string;
 }
