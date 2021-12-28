@@ -1,4 +1,4 @@
-import { EventSerializers, EventSourcingOptions } from './Interfaces';
+import { EventSerializers, EventSourcingOptions } from './interfaces';
 import {
   AppendExpectedRevision,
   END,

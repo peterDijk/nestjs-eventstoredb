@@ -1,5 +1,5 @@
 import { IEvent } from '@nestjs/cqrs';
-import { IViewUpdater } from './Interfaces/View-Updater';
+import { IViewUpdater } from './interfaces/view-updater';
 import { Type } from '@nestjs/common';
 
 export class ViewUpdaters {

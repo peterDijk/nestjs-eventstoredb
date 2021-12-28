@@ -1,7 +1,7 @@
 import { EventBus } from '@nestjs/cqrs/dist/event-bus';
 import { Injectable } from '@nestjs/common';
 import { IEvent, IEventBus } from '@nestjs/cqrs/dist/interfaces';
-import { ViewUpdater } from './View-Updater';
+import { ViewUpdater } from './view-updater';
 
 @Injectable()
 export class ViewEventBus implements IEventBus {

@@ -1,8 +1,8 @@
 import { Injectable, Type } from '@nestjs/common';
-import { IViewUpdater } from './Interfaces/View-Updater';
+import { IViewUpdater } from './interfaces/view-updater';
 import { IEvent } from '@nestjs/cqrs';
 import { ModuleRef } from '@nestjs/core';
-import { ViewUpdaters } from './View-Updaters';
+import { ViewUpdaters } from './view-updaters';
 
 @Injectable()
 export class ViewUpdater {
