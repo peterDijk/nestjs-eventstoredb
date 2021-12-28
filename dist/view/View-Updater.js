@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ViewUpdater = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
-const View_Updaters_1 = require("./View-Updaters");
+const view_updaters_1 = require("./view-updaters");
 let ViewUpdater = class ViewUpdater {
     constructor(moduleRef) {
         this.moduleRef = moduleRef;
@@ -29,7 +29,7 @@ let ViewUpdater = class ViewUpdater {
     }
     run(event) {
         return __awaiter(this, void 0, void 0, function* () {
-            const updater = View_Updaters_1.ViewUpdaters.get(event.constructor.name);
+            const updater = view_updaters_1.ViewUpdaters.get(event.constructor.name);
             if (updater) {
                 if (!this.instances.has(updater)) {
                     this.instances.set(updater, this.moduleRef.get(updater.name, { strict: false }));

@@ -1,5 +1,5 @@
 import { DynamicModule } from '@nestjs/common';
-import { EventSerializers, EventSourcingOptions } from './Interfaces';
+import { EventSerializers, EventSourcingOptions } from './interfaces';
 export declare class EventStoreModule {
     static forRoot(options: EventSourcingOptions): DynamicModule;
     static forFeature(options: {

@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ViewEventBus = void 0;
 const event_bus_1 = require("@nestjs/cqrs/dist/event-bus");
 const common_1 = require("@nestjs/common");
-const View_Updater_1 = require("./View-Updater");
+const view_updater_1 = require("./view-updater");
 let ViewEventBus = class ViewEventBus {
     constructor(eventBus, viewUpdater) {
         this.eventBus = eventBus;
@@ -39,6 +39,6 @@ let ViewEventBus = class ViewEventBus {
 ViewEventBus = __decorate([
     common_1.Injectable(),
     __metadata("design:paramtypes", [event_bus_1.EventBus,
-        View_Updater_1.ViewUpdater])
+        view_updater_1.ViewUpdater])
 ], ViewEventBus);
 exports.ViewEventBus = ViewEventBus;

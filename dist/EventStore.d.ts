@@ -1,4 +1,4 @@
-import { EventSerializers, EventSourcingOptions } from './Interfaces';
+import { EventSerializers, EventSourcingOptions } from './interfaces';
 import { AppendExpectedRevision } from '@eventstore/db-client';
 import { IEvent } from '@nestjs/cqrs';
 import { Subject } from 'rxjs';

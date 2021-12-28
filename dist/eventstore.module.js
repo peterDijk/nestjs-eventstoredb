@@ -21,7 +21,7 @@ const common_1 = require("@nestjs/common");
 const cqrs_1 = require("@nestjs/cqrs");
 const core_1 = require("@nestjs/core");
 const store_event_subscriber_1 = require("./store-event-subscriber");
-const EventStore_1 = require("./EventStore");
+const eventStore_1 = require("./eventStore");
 const view_1 = require("./view");
 const store_event_bus_1 = require("./store-event-bus");
 const store_event_publisher_1 = require("./store-event-publisher");
@@ -31,11 +31,11 @@ let EventStoreModule = EventStoreModule_1 = class EventStoreModule {
             module: EventStoreModule_1,
             providers: [
                 {
-                    provide: EventStore_1.EventStore,
-                    useValue: new EventStore_1.EventStore(options),
+                    provide: eventStore_1.EventStore,
+                    useValue: new eventStore_1.EventStore(options),
                 },
             ],
-            exports: [EventStore_1.EventStore],
+            exports: [eventStore_1.EventStore],
             global: true,
         };
     }
@@ -52,7 +52,7 @@ let EventStoreModule = EventStoreModule_1 = class EventStoreModule {
                         useFactory: (commandBus, moduleRef, eventStore, event$, viewEventsBus) => {
                             return new store_event_bus_1.StoreEventBus(commandBus, moduleRef, eventStore, event$, viewEventsBus, options.streamPrefix, options.eventSerializers);
                         },
-                        inject: [cqrs_1.CommandBus, core_1.ModuleRef, EventStore_1.EventStore, cqrs_1.EventBus, view_1.ViewEventBus],
+                        inject: [cqrs_1.CommandBus, core_1.ModuleRef, eventStore_1.EventStore, cqrs_1.EventBus, view_1.ViewEventBus],
                     },
                     store_event_publisher_1.StoreEventPublisher,
                 ],
