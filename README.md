@@ -1,18 +1,17 @@
 # ✨ Event Sourcing for Nestjs using EventstoreDB
 
-# WORK IN PROGRESS!!! PUBLISHED FOR DOCKER REASONS..
-
-<!-- [![](https://badgen.net/npm/v/event-sourcing-nestjs)](https://www.npmjs.com/package/event-sourcing-nestjs) ![](https://badgen.net/npm/dt/event-sourcing-nestjs) -->
+[![](https://badgen.net/npm/v/@peterdijk/nestjs-eventstoredb)](https://www.npmjs.com/package/@peterdijk/nestjs-eventstoredb) ![](https://badgen.net/npm/dt/@peterdijk/nestjs-eventstoredb)
 
 Library that implements event sourcing using NestJS and his CQRS library.
 
 ## ⭐️ Features
 
-- **StoreEventBus**: A class that replaces Nest's EventBus to also persists events in mongodb.
+- **StoreEventBus**: A class that replaces Nest's EventBus to also persists events in EventStoreDB.
 - **StoreEventPublisher**: A class that replaces Nest's EventPublisher.
-- **ViewUpdaterHandler**: The EventBus will also delegate the Events to his View Updaters, so you can update your read database.
+- **ViewUpdaterHandler**: Use the ViewUpdater to handle the event in the EventHandler, so you can update your read database.
 - **Replay**: You can re-run stored events. This will only trigger the view updater handlers to reconstruct your read db.
-- **EventStore**: Get history of events for an aggregate.
+  Current version runs updaters on all events on app init. Improvement is planned.
+- **EventStore**: Get history of events for an aggregate using `getEvents`.
 
 ## 📖 Contents
 
@@ -32,7 +31,7 @@ Library that implements event sourcing using NestJS and his CQRS library.
 ## 🛠 Installation
 
 ```bash
-npm install event-sourcing-nestjs @nestjs/cqrs --save
+npm install @peterdijk/nestjs-eventstore @nestjs/cqrs --save
 ```
 
 ## Usage
@@ -48,7 +47,7 @@ import { EventStoreModule } from '@peterdijk/nestjs-eventstoredb';
 @Module({
   imports: [
     EventSourcingModule.forRoot({
-      ...
+      eventStoreUrl: 'esdb://eventstore.db:2113',
     }),
   ],
 })
@@ -62,9 +61,17 @@ import { Module } from '@nestjs/common';
 import { EventStoreModule } from '@peterdijk/nestjs-eventstoredb';
 
 @Module({
-  imports: [EventStoreModule.forFeature()],
+  imports: [
+    EventStoreModule.forFeature({
+      streamPrefix: 'game',
+      eventSerializers: {
+        NewGameStartedEvent: ({ id, wordToGuess, other_properties }) =>
+          new NewGameStartedEvent(id, wordToGuess, other_properties),
+      },
+    }),
+  ],
 })
-export class UserModule {}
+export class GamesModule {}
 ```
 
 ### Events
@@ -72,27 +79,9 @@ export class UserModule {}
 Your events must extend the abstract class StorableEvent.
 
 ```ts
-export class UserCreatedEvent extends StorableEvent {
+export class NewGameStartedEvent extends StorableEvent {
   eventVersion = 1;
   id = '_id_';
-}
-```
-
-### Event emitter
-
-Instead of using Nest's EventBus use StoreEventBus, so events will persist before their handlers are executed.
-
-```ts
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { StoreEventBus } from 'event-sourcing-nestjs';
-
-@CommandHandler(CreateUserCommand)
-export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
-  constructor(private readonly eventBus: StoreEventBus) {}
-
-  async execute(command: CreateUserCommand) {
-    this.eventBus.publish(new UserCreatedEvent(command.name));
-  }
 }
 ```
 
@@ -102,47 +91,79 @@ Use **StoreEventPublisher** if you want to dispatch events from your AggregateRo
 
 ```ts
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { HeroRepository } from '../../repository/hero.repository';
-import { KillDragonCommand } from '../impl/kill-dragon.command';
-import { StoreEventPublisher } from 'event-sourcing-nestjs';
+import { GamesRepository } from '../../repository/game.repository';
+import { StartNewGameCommand } from '../impl/StartNewGame.command';
+import { StoreEventPublisher } from '@peterdijk/nestjs-eventstoredb';
 
-@CommandHandler(KillDragonCommand)
-export class KillDragonHandler implements ICommandHandler<KillDragonCommand> {
+@CommandHandler(StartNewGameCommand)
+export class StartNewGameCommandHandler
+  implements ICommandHandler<StartNewGameCommand>
+{
   constructor(
-    private readonly repository: HeroRepository,
+    private readonly repository: GamesRepository,
     private readonly publisher: StoreEventPublisher,
   ) {}
 
-  async execute(command: KillDragonCommand) {
-    const { heroId, dragonId } = command;
-    const hero = this.publisher.mergeObjectContext(
-      await this.repository.findOneById(heroId),
+  async execute({ data, uuid }: StartNewGameCommand) {
+    const { playerId, wordToGuess, maxGuesses } = data;
+
+    const game = this.publisher.mergeObjectContext(
+      await this.repository.startNewGame(
+        { playerId, wordToGuess, maxGuesses },
+        uuid,
+      ),
     );
-    hero.killEnemy(dragonId);
-    hero.commit();
+
+    game.commit();
   }
 }
 ```
 
 ### Get event history
 
-Reconstruct an aggregate getting his event history.
+Reconstruct an aggregate getting it's event history when your event performs an action on a previously created aggregate (in this example, guessing a letter on a previously created hangman game)
 
 ```ts
-const aggregate = 'user';
-const id = '_id_';
-console.log(await this.eventStore.getEvents(aggregate, id));
+@Injectable()
+export class GamesRepository {
+  constructor(
+    private readonly eventStore: EventStore,
+    private readonly eventBus: StoreEventBus,
+  ) {}
+
+  async findOneById(aggregateId: string): Promise<Game> {
+    const game = new Game(aggregateId);
+    const { events } = await this.eventStore.getEvents(
+      this.eventBus.streamPrefix,
+      aggregateId,
+    );
+    game.loadFromHistory(events);
+    return game;
+  }
+
+  ...
+
+  async guessLetter(gameId: string, letter: string) {
+    const game = await this.findOneById(gameId);
+    await game.guessLetter(letter);
+
+    return game;
+  }
 ```
+
+#### Note about loadfromHistory
+
+NestJS's AggregateRoot's method `loadFromHistory` looks for methods on the aggregate of which the name starts with `on` and then the name of the event: `onNewGameStartedEvent`.
+In this method set the state of the aggregate using the event's properties.
 
 #### Full example
 
 hero-killed-dragon.event.ts
 
 ```ts
-import { StorableEvent } from 'event-sourcing-nestjs';
+import { StorableEvent } from '@peterdijk/nestjs-eventstoredb';
 
 export class HeroKilledDragonEvent extends StorableEvent {
-  eventAggregate = 'hero';
   eventVersion = 1;
 
   constructor(public readonly id: string, public readonly dragonId: string) {
@@ -185,15 +206,22 @@ hero.repository.ts
 ```ts
 import { Injectable } from '@nestjs/common';
 import { Hero } from '../models/hero.model';
-import { EventStore } from 'event-sourcing-nestjs';
+import { EventStore, StoreEventBus } from '@peterdijk/nestjs-eventstoredb';
 
 @Injectable()
 export class HeroRepository {
-  constructor(private readonly eventStore: EventStore) {}
+  constructor(
+    private readonly eventStore: EventStore,
+    private readonly eventBus: StoreEventBus,
+  ) {}
 
   async findOneById(id: string): Promise<Hero> {
     const hero = new Hero(id);
-    hero.loadFromHistory(await this.eventStore.getEvents('hero', id));
+    const { events } = await this.eventStore.getEvents(
+      this.eventBus.streamPrefix,
+      id,
+    );
+    hero.loadFromHistory(events);
     return hero;
   }
 }
@@ -211,7 +239,10 @@ This view updaters will be used to recontruct the db if needed.
 Read more info about the Materialized View pattern [here](https://docs.microsoft.com/en-gb/azure/architecture/patterns/materialized-view)
 
 ```ts
-import { IViewUpdater, ViewUpdaterHandler } from 'event-sourcing-nestjs';
+import {
+  IViewUpdater,
+  ViewUpdaterHandler,
+} from '@peterdijk/nestjs-eventstoredb';
 
 @ViewUpdaterHandler(UserCreatedEvent)
 export class UserCreatedUpdater implements IViewUpdater<UserCreatedEvent> {
@@ -222,6 +253,8 @@ export class UserCreatedUpdater implements IViewUpdater<UserCreatedEvent> {
 ```
 
 ## Reconstructing the view db
+
+(w.i.p. to implement this in this version)
 
 ```ts
 await ReconstructViewDb.run(await NestFactory.create(AppModule.forRoot()));

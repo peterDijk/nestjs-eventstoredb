@@ -20,8 +20,7 @@ export class EventStore {
     [aggregate: string]: EventSerializers;
   } = {};
   private readonly config;
-  public eventStoreLaunched = false;
-
+  private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
 
   constructor(options: EventStoreOptions) {
