@@ -5,20 +5,16 @@ import { ViewUpdater } from './view-updater';
 
 @Injectable()
 export class ViewEventBus implements IEventBus {
+  constructor(
+    private readonly eventBus: EventBus,
+    private viewUpdater: ViewUpdater,
+  ) {}
 
-    constructor(
-        private readonly eventBus: EventBus,
-        private viewUpdater: ViewUpdater,
-    ) {
-    }
+  async publish<T extends IEvent>(event: T): Promise<unknown> {
+    return await this.viewUpdater.run(event);
+  }
 
-    publish<T extends IEvent>(event: T): void {
-        this.viewUpdater.run(event)
-        .then(() => this.eventBus.publish(event))
-        .catch(err => { throw err; });
-    }
-
-    publishAll(events: IEvent[]): void {
-        (events || []).forEach(event => this.publish(event));
-    }
+  publishAll(events: IEvent[]): void {
+    (events || []).forEach(async event => await this.publish(event));
+  }
 }

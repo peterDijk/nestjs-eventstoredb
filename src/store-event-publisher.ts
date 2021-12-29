@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { StoreEventBus } from './store-event-bus';
 import { IEvent, AggregateRoot } from '@nestjs/cqrs';
+import { StoreEventBus } from './store-event-bus';
 
 export interface Constructor<T> {
   new (...args: any[]): T;

@@ -1,47 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { Type } from './metadata';
-import { EventStore } from './eventstore';
-import { AggregateRoot } from '@nestjs/cqrs';
+// pvd not used
 
-@Injectable()
-export class AggregateRepository {
-  constructor(
-    private readonly eventStore: EventStore, // private readonly options?: any,
-  ) {}
+// import { Injectable } from '@nestjs/common';
+// import { Type } from './metadata';
+// import { EventStore } from './eventstore';
+// import { AggregateRoot } from '@nestjs/cqrs';
 
-  async getById<T extends AggregateRoot>(
-    type: Type<T>,
-    aggregateName: string,
-    aggregateId: string,
-  ): Promise<T | null> {
-    const { events, snapshot, lastRevision } = await this.eventStore.getEvents(
-      aggregateName,
-      aggregateId,
-    );
+// @Injectable()
+// export class AggregateRepository {
+//   constructor(
+//     private readonly eventStore: EventStore, // private readonly options?: any,
+//   ) {}
 
-    if (!events || events.length === 0) {
-      return null;
-    }
+//   async getById<T extends AggregateRoot>(
+//     type: Type<T>,
+//     aggregateName: string,
+//     aggregateId: string,
+//   ): Promise<T | null> {
+//     const { events, snapshot, lastRevision } = await this.eventStore.getEvents(
+//       aggregateName,
+//       aggregateId,
+//     );
 
-    const aggregate = new type(aggregateId, lastRevision, snapshot);
-    aggregate.loadFromHistory(events);
+//     if (!events || events.length === 0) {
+//       return null;
+//     }
 
-    const performSnapshotAt =
-      this.eventStore.getSnapshotInterval(aggregateName);
+//     const aggregate = new type(aggregateId, lastRevision, snapshot);
+//     aggregate.loadFromHistory(events);
 
-    if (performSnapshotAt && events.length > performSnapshotAt) {
-      const state = (aggregate as any).state;
+//     const performSnapshotAt =
+//       this.eventStore.getSnapshotInterval(aggregateName);
 
-      if (state) {
-        this.eventStore.createSnapshot(
-          aggregateName,
-          aggregateId,
-          lastRevision,
-          state,
-        );
-      }
-    }
+//     if (performSnapshotAt && events.length > performSnapshotAt) {
+//       const state = (aggregate as any).state;
 
-    return aggregate;
-  }
-}
+//       if (state) {
+//         this.eventStore.createSnapshot(
+//           aggregateName,
+//           aggregateId,
+//           lastRevision,
+//           state,
+//         );
+//       }
+//     }
+
+//     return aggregate;
+//   }
+// }

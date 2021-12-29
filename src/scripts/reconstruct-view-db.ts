@@ -5,25 +5,21 @@ import { ViewUpdater } from '../view/view-updater';
 export class ReconstructViewDb {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   static async run(app: INestApplication) {
-    const sleep = (ms: number) => {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    };
-
-    const eventStore = app.get(EventStore);
-    const viewUpdater = app.get(ViewUpdater);
-
-    while (!eventStore.isInitiated()) {
-      // We wait until the event store is fully launched
-      await sleep(100);
-    }
-    let event;
-    let index = 0;
-
-    while ((event = await eventStore.getEvent(index))) {
-      await viewUpdater.run(event);
-      index++;
-    }
-
-    console.log('View db has been restored!');
+    // const sleep = (ms: number) => {
+    //   return new Promise(resolve => setTimeout(resolve, ms));
+    // };
+    // const eventStore = app.get(EventStore);
+    // const viewUpdater = app.get(ViewUpdater);
+    // while (!eventStore.isInitiated()) {
+    //   // We wait until the event store is fully launched
+    //   await sleep(100);
+    // }
+    // let event;
+    // let index = 0;
+    // while ((event = await eventStore.getEvent(index))) {
+    //   await viewUpdater.run(event);
+    //   index++;
+    // }
+    // console.log('View db has been restored!');
   }
 }
