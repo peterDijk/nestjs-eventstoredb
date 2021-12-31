@@ -1,5 +1,7 @@
 # ✨ Event Sourcing for Nestjs using EventstoreDB
 
+This package is a adaptation of `@berniemac`'s package: https://www.npmjs.com/package/@berniemac/event-sourcing-nestjs
+
 [![](https://badgen.net/npm/v/@peterdijk/nestjs-eventstoredb)](https://www.npmjs.com/package/@peterdijk/nestjs-eventstoredb) ![](https://badgen.net/npm/dt/@peterdijk/nestjs-eventstoredb)
 
 Library that implements event sourcing using NestJS and his CQRS library.
@@ -46,7 +48,7 @@ import { EventStoreModule } from '@peterdijk/nestjs-eventstoredb';
 
 @Module({
   imports: [
-    EventSourcingModule.forRoot({
+    EventStoreModule.forRoot({
       eventStoreUrl: 'esdb://eventstore.db:2113',
     }),
   ],
