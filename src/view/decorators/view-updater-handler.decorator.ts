@@ -11,8 +11,5 @@ export function ViewUpdaterHandler(
   return (target: Type<IViewUpdater<IEvent>>) => {
     ViewUpdaters.add(event.name, target);
     logger.debug(`registered updater event ${event.name}`);
-    logger.debug(
-      `current registered updater handlers: ${ViewUpdaters.getAll()}`,
-    );
   };
 }

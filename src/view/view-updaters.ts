@@ -14,8 +14,4 @@ export class ViewUpdaters {
   static get(name: string): Type<IViewUpdater<IEvent>> {
     return ViewUpdaters.updaters.get(name);
   }
-
-  static getAll(): IterableIterator<[string, Type<IViewUpdater<IEvent>>]> {
-    return ViewUpdaters.updaters.entries();
-  }
 }
