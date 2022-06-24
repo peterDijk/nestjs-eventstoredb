@@ -38,7 +38,10 @@ export class EventStore {
     return this.eventStoreLaunched;
   }
 
-  public setSerializers(aggregate: string, eventSerializers: EventSerializers) {
+  public setSerializers(
+    aggregate: string,
+    eventSerializers: EventSerializers,
+  ): void {
     this.aggregateEventSerializers[aggregate] = eventSerializers;
   }
 
@@ -149,7 +152,11 @@ export class EventStore {
     this.logger.log('Done parsing all past events to projection');
   }
 
-  subscribe(streamPrefix: string, bridge: Subject<any>) {
+  subscribe(
+    streamPrefix: string,
+    bridge: Subject<any>,
+    viewEventsBus: ViewEventBus,
+  ): void {
     const filter = streamNameFilter({ prefixes: [streamPrefix] });
     const subscription = this.eventstore.subscribeToAll({
       filter,
@@ -159,9 +166,14 @@ export class EventStore {
       const parsedEvent = this.aggregateEventSerializers[streamPrefix][
         data.event.type
       ](data.event.data);
+
+      // throw the parsed event on the main NestJS event bus (it will be picked up by handlers that are decorated by @EventsHandler)
       if (bridge) {
         bridge.next(parsedEvent);
       }
+
+      // throw it onto our own ViewEventBus. Update handlers decorated with @ViewUpdaterHandler will be registered and called from the bus
+      viewEventsBus.publish(parsedEvent);
     });
     this.logger.log(`Subscribed to all streams with prefix '${streamPrefix}-'`);
   }
