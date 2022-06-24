@@ -1,6 +1,7 @@
 import { IEvent } from '@nestjs/cqrs';
 import { IViewUpdater } from './interfaces/view-updater';
-import { Type } from '@nestjs/common';
+import { Type, Logger } from '@nestjs/common';
+import { ViewUpdater } from './view-updater';
 
 export class ViewUpdaters {
   private static updaters = new Map<string, Type<IViewUpdater<IEvent>>>();
@@ -12,5 +13,9 @@ export class ViewUpdaters {
 
   static get(name: string): Type<IViewUpdater<IEvent>> {
     return ViewUpdaters.updaters.get(name);
+  }
+
+  static getAll(): IterableIterator<[string, Type<IViewUpdater<IEvent>>]> {
+    return ViewUpdaters.updaters.entries();
   }
 }

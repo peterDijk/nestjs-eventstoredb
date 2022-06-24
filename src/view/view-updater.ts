@@ -1,4 +1,4 @@
-import { Injectable, Type } from '@nestjs/common';
+import { Injectable, Type, Logger } from '@nestjs/common';
 import { IViewUpdater } from './interfaces/view-updater';
 import { IEvent } from '@nestjs/cqrs';
 import { ModuleRef } from '@nestjs/core';
@@ -10,6 +10,7 @@ export class ViewUpdater {
     Type<IViewUpdater<IEvent>>,
     IViewUpdater<IEvent>
   >();
+  private logger = new Logger(ViewUpdater.name);
 
   constructor(private moduleRef: ModuleRef) {}
 
@@ -22,6 +23,9 @@ export class ViewUpdater {
           this.moduleRef.get(updater.name, { strict: false }),
         );
       }
+      this.logger.debug(
+        `found updater for event ${event.constructor.name} - calling handle method`,
+      );
       await this.instances.get(updater).handle(event);
     }
     return;

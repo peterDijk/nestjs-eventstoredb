@@ -19,17 +19,21 @@ export class EventStoreEventSubscriber implements IMessageSource {
     private readonly streamPrefix: string,
   ) {}
 
-  async getAll() {
+  async getAll(): Promise<void> {
     await this.eventStore.getAll(this.viewEventsBus, this.streamPrefix);
   }
 
-  subscribe() {
+  subscribe(): void {
     if (this.bridge) {
-      this.eventStore.subscribe(this.streamPrefix, this.bridge);
+      this.eventStore.subscribe(
+        this.streamPrefix,
+        this.bridge,
+        this.viewEventsBus,
+      );
     }
   }
 
-  bridgeEventsTo<T extends IEvent>(subject: Subject<T>) {
+  bridgeEventsTo<T extends IEvent>(subject: Subject<T>): void {
     this.bridge = subject;
   }
 }
