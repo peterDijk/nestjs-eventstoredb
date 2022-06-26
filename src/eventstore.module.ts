@@ -31,6 +31,9 @@ export class EventStoreModule {
     streamPrefix: string;
     eventSerializers: EventSerializers;
   }): Promise<DynamicModule> {
+    new Logger(EventStoreModule.name).debug(
+      `forFeature: ${JSON.stringify({ streamPrefix: options.streamPrefix })}`,
+    );
     return {
       module: EventStoreModule,
       imports: [CqrsModule],

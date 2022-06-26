@@ -10,9 +10,6 @@ export class ViewEventBus implements IEventBus {
   constructor(private viewUpdater: ViewUpdater) {}
 
   async publish<T extends IEvent>(event: T): Promise<unknown> {
-    this.logger.debug(
-      `event published on the View Bus: ${event.constructor.name}`,
-    );
     return await this.viewUpdater.run(event);
   }
 

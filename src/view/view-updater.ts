@@ -23,9 +23,6 @@ export class ViewUpdater {
           this.moduleRef.get(updater.name, { strict: false }),
         );
       }
-      this.logger.debug(
-        `found updater for event ${event.constructor.name} - calling handle method`,
-      );
       await this.instances.get(updater).handle(event);
     }
     return;
