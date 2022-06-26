@@ -4,6 +4,7 @@ import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { IEvent, IEventBus } from '@nestjs/cqrs/dist/interfaces';
 import { EventStore } from './eventstore';
 import { EventSerializers, StorableEvent } from './interfaces';
+import { StoreEventMetadataStorage } from './store-event-metadata.storage';
 import { EventStoreEventSubscriber } from './store-event-subscriber';
 import { ViewEventBus } from './view';
 
@@ -18,10 +19,8 @@ export class StoreEventBus extends EventBus implements IEventBus {
     moduleRef: ModuleRef,
     private readonly eventStore: EventStore,
     private readonly event$: EventBus,
-    private readonly viewEventsBus: ViewEventBus,
-  ) // streamPrefix: string,
-  // eventSerializers: EventSerializers,
-  {
+    private readonly viewEventsBus: ViewEventBus, // streamPrefix: string, // eventSerializers: EventSerializers,
+  ) {
     super(commandBus, moduleRef);
     // this.streamPrefix = streamPrefix;
     // this.eventSerializers = eventSerializers;
@@ -29,16 +28,25 @@ export class StoreEventBus extends EventBus implements IEventBus {
 
   async onModuleInit(): Promise<void> {
     this.logger.debug('onModuleInit');
+    const aggregates = StoreEventMetadataStorage.getAggregates();
+    const serializers = StoreEventMetadataStorage.getSerializers();
+    console.log({ aggregates, serializers });
+    this.logger.debug(`${JSON.stringify(serializers)}`);
+    // const aggregates = Object.keys(serializers).map(key => key);
+
+    // aggregates.forEach(agg => {
+    //   console.log({ agg });
+    // });
 
     // this.eventStore.setSerializers(this.streamPrefix, this.eventSerializers);
-    const subscriber = new EventStoreEventSubscriber(
-      this.eventStore,
-      this.viewEventsBus,
-      this.streamPrefix,
-    );
-    subscriber.bridgeEventsTo(this.event$.subject$);
-    await subscriber.getAll(); // from checkpoint xxx comes later
-    subscriber.subscribe();
+    // const subscriber = new EventStoreEventSubscriber(
+    //   this.eventStore,
+    //   this.viewEventsBus,
+    //   this.streamPrefix,
+    // );
+    // subscriber.bridgeEventsTo(this.event$.subject$);
+    // await subscriber.getAll(); // from checkpoint xxx comes later
+    // subscriber.subscribe();
   }
 
   publish<T extends IEvent>(event: T): void {

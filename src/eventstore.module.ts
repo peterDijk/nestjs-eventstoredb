@@ -42,6 +42,11 @@ export class EventStoreModule {
     //   options.eventSerializers,
     // );
 
+    StoreEventMetadataStorage.addAggregateAndSerializers(
+      options.streamPrefix,
+      options.eventSerializers,
+    );
+
     return {
       module: EventStoreModule,
       imports: [CqrsModule],
