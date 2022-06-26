@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { IEvent, IEventBus } from '@nestjs/cqrs/dist/interfaces';
@@ -11,6 +11,7 @@ import { ViewEventBus } from './view';
 export class StoreEventBus extends EventBus implements IEventBus {
   public streamPrefix: string;
   public eventSerializers: EventSerializers;
+  private logger = new Logger(StoreEventBus.name);
 
   constructor(
     commandBus: CommandBus,
@@ -18,16 +19,18 @@ export class StoreEventBus extends EventBus implements IEventBus {
     private readonly eventStore: EventStore,
     private readonly event$: EventBus,
     private readonly viewEventsBus: ViewEventBus,
-    streamPrefix: string,
-    eventSerializers: EventSerializers,
-  ) {
+  ) // streamPrefix: string,
+  // eventSerializers: EventSerializers,
+  {
     super(commandBus, moduleRef);
-    this.streamPrefix = streamPrefix;
-    this.eventSerializers = eventSerializers;
+    // this.streamPrefix = streamPrefix;
+    // this.eventSerializers = eventSerializers;
   }
 
-  async onModuleInit() {
-    this.eventStore.setSerializers(this.streamPrefix, this.eventSerializers);
+  async onModuleInit(): Promise<void> {
+    this.logger.debug('onModuleInit');
+
+    // this.eventStore.setSerializers(this.streamPrefix, this.eventSerializers);
     const subscriber = new EventStoreEventSubscriber(
       this.eventStore,
       this.viewEventsBus,

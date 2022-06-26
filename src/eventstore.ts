@@ -16,6 +16,8 @@ import { Logger } from '@nestjs/common';
 
 export class EventStore {
   private readonly eventstore: EventStoreDBClient;
+
+  // TODO: make it a Set
   private aggregateEventSerializers: {
     [aggregate: string]: EventSerializers;
   } = {};
@@ -42,6 +44,7 @@ export class EventStore {
     aggregate: string,
     eventSerializers: EventSerializers,
   ): void {
+    this.logger.debug(`setSerializers: ${aggregate}`);
     this.aggregateEventSerializers[aggregate] = eventSerializers;
   }
 

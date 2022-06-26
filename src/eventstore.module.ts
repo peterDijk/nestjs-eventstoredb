@@ -7,6 +7,8 @@ import { EventStore } from './eventstore';
 import { ViewEventBus, ViewUpdater } from './view';
 import { StoreEventBus } from './store-event-bus';
 import { StoreEventPublisher } from './store-event-publisher';
+import { StoreEventMetadataStorage } from './store-event-metadata.storage';
+import { streamNameFilter } from '@eventstore/db-client';
 
 @Module({
   imports: [CqrsModule],
@@ -27,10 +29,19 @@ export class EventStoreModule {
     };
   }
 
+  private logger = new Logger(EventStoreModule.name);
+
   static async forFeature(options: {
     streamPrefix: string;
     eventSerializers: EventSerializers;
   }): Promise<DynamicModule> {
+    Logger.debug('forFeature');
+
+    // StoreEventMetadataStorage.addSerializersByAggregateName(
+    //   options.streamPrefix,
+    //   options.eventSerializers,
+    // );
+
     return {
       module: EventStoreModule,
       imports: [CqrsModule],
@@ -46,14 +57,16 @@ export class EventStoreModule {
             event$: EventBus,
             viewEventsBus: ViewEventBus,
           ) => {
+            Logger.debug('useFactory');
+
             return new StoreEventBus(
               commandBus,
               moduleRef,
               eventStore,
               event$,
               viewEventsBus,
-              options.streamPrefix,
-              options.eventSerializers,
+              // options.streamPrefix,
+              // options.eventSerializers,
             );
           },
           inject: [CommandBus, ModuleRef, EventStore, EventBus, ViewEventBus],
