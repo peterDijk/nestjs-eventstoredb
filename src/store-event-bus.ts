@@ -10,8 +10,8 @@ import { ViewEventBus } from './view';
 
 @Injectable()
 export class StoreEventBus extends EventBus implements IEventBus {
-  public streamPrefix: string;
-  public eventSerializers: EventSerializers;
+  // public streamPrefix: string;
+  // public eventSerializers: EventSerializers;
   private logger = new Logger(StoreEventBus.name);
 
   constructor(
@@ -32,11 +32,20 @@ export class StoreEventBus extends EventBus implements IEventBus {
     const serializers = StoreEventMetadataStorage.getSerializers();
     console.log({ aggregates, serializers });
     this.logger.debug(`${JSON.stringify(serializers)}`);
-    // const aggregates = Object.keys(serializers).map(key => key);
 
-    // aggregates.forEach(agg => {
-    //   console.log({ agg });
-    // });
+    aggregates.forEach(agg => {
+      this.eventStore.setSerializers(agg, serializers[agg]);
+      const subscriber = new EventStoreEventSubscriber(
+        this.eventStore,
+        this.viewEventsBus,
+        agg,
+      );
+      subscriber.bridgeEventsTo(this.event$.subject$);
+      subscriber.getAll(); // from checkpoint xxx comes later
+      subscriber.subscribe();
+    });
+
+    // todo: loop over aggr
 
     // this.eventStore.setSerializers(this.streamPrefix, this.eventSerializers);
     // const subscriber = new EventStoreEventSubscriber(
@@ -50,14 +59,16 @@ export class StoreEventBus extends EventBus implements IEventBus {
   }
 
   publish<T extends IEvent>(event: T): void {
+    this.logger.debug(`publish ${event}`);
     const storableEvent = event as any as StorableEvent;
     if (
       storableEvent.id === undefined ||
-      storableEvent.eventVersion === undefined
+      storableEvent.eventVersion === undefined ||
+      storableEvent.aggregate === undefined
     ) {
       throw new Error('Events must implement StorableEvent interface');
     }
-    this.eventStore.storeEvent(storableEvent, this.streamPrefix);
+    this.eventStore.storeEvent(storableEvent, storableEvent.aggregate);
   }
 
   publishAll(events: IEvent[]): void {

@@ -8,10 +8,12 @@ export abstract class StorableEvent implements IEvent {
   abstract id: string;
   abstract eventVersion: number;
   eventName: string;
+  aggregate: string;
 
   readonly meta: IEventMeta;
 
-  constructor() {
+  constructor(aggregate: string) {
     this.eventName = this.constructor.name;
+    this.aggregate = aggregate;
   }
 }

@@ -152,7 +152,9 @@ export class EventStore {
         }
       }
     }
-    this.logger.log('Done parsing all past events to projection');
+    this.logger.log(
+      `Done parsing all past events to projection bus for '${streamPrefix}'`,
+    );
   }
 
   subscribe(

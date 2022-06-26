@@ -6,7 +6,9 @@ import { EventSerializers } from './interfaces';
 export class StoreEventMetadataStorage {
   private static readonly storage = new Map<string, EventSerializers>();
   private static aggregates: string[] = [];
-  private static serializers: EventSerializers = {};
+  private static serializers: {
+    [aggregate: string]: EventSerializers;
+  } = {};
 
   static addSerializersByAggregateName(
     aggregate: string,
@@ -37,12 +39,12 @@ export class StoreEventMetadataStorage {
   ): void {
     console.log({ aggregate, serializers });
     this.aggregates.push(aggregate);
-    Object.keys(serializers).map(key => {
-      this.serializers[key] = serializers[key];
-    });
+    this.serializers[aggregate] = serializers;
   }
 
-  static getSerializers(): EventSerializers {
+  static getSerializers(): {
+    [aggregate: string]: EventSerializers;
+  } {
     return this.serializers;
   }
 

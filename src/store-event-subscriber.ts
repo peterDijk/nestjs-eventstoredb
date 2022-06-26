@@ -17,7 +17,9 @@ export class EventStoreEventSubscriber implements IMessageSource {
     private readonly eventStore: EventStore,
     private readonly viewEventsBus: ViewEventBus,
     private readonly streamPrefix: string,
-  ) {}
+  ) {
+    this.logger.debug(`streamPrefix: ${streamPrefix}`);
+  }
 
   async getAll(): Promise<void> {
     await this.eventStore.getAll(this.viewEventsBus, this.streamPrefix);
