@@ -55,8 +55,6 @@ export class EventStoreModule {
             event$: EventBus,
             viewEventsBus: ViewEventBus,
           ) => {
-            Logger.debug('useFactory');
-
             return new StoreEventBus(
               commandBus,
               moduleRef,
