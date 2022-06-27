@@ -47,11 +47,11 @@ export class StoreEventBus extends EventBus implements IEventBus {
     if (
       storableEvent.id === undefined ||
       storableEvent.eventVersion === undefined ||
-      storableEvent.aggregate === undefined
+      storableEvent.aggregateName === undefined
     ) {
       throw new Error('Events must implement StorableEvent interface');
     }
-    this.eventStore.storeEvent(storableEvent, storableEvent.aggregate);
+    this.eventStore.storeEvent(storableEvent, storableEvent.aggregateName);
   }
 
   publishAll(events: IEvent[]): void {
