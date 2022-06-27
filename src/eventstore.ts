@@ -44,7 +44,7 @@ export class EventStore {
     aggregate: string,
     eventSerializers: EventSerializers,
   ): void {
-    this.logger.debug(`setSerializers: ${aggregate}`);
+    this.logger.debug(`setting serializers for ${aggregate}`);
     this.aggregateEventSerializers[aggregate] = eventSerializers;
   }
 

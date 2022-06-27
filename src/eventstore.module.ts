@@ -35,13 +35,6 @@ export class EventStoreModule {
     streamPrefix: string;
     eventSerializers: EventSerializers;
   }): Promise<DynamicModule> {
-    Logger.debug('forFeature');
-
-    // StoreEventMetadataStorage.addSerializersByAggregateName(
-    //   options.streamPrefix,
-    //   options.eventSerializers,
-    // );
-
     StoreEventMetadataStorage.addAggregateAndSerializers(
       options.streamPrefix,
       options.eventSerializers,
@@ -70,14 +63,11 @@ export class EventStoreModule {
               eventStore,
               event$,
               viewEventsBus,
-              // options.streamPrefix,
-              // options.eventSerializers,
             );
           },
           inject: [CommandBus, ModuleRef, EventStore, EventBus, ViewEventBus],
         },
         StoreEventPublisher,
-        // AggregateRepository,
       ],
       exports: [ViewUpdater, ViewEventBus, StoreEventBus, StoreEventPublisher],
     };

@@ -10,8 +10,6 @@ import { ViewEventBus } from './view';
 
 @Injectable()
 export class StoreEventBus extends EventBus implements IEventBus {
-  // public streamPrefix: string;
-  // public eventSerializers: EventSerializers;
   private logger = new Logger(StoreEventBus.name);
 
   constructor(
@@ -19,19 +17,17 @@ export class StoreEventBus extends EventBus implements IEventBus {
     moduleRef: ModuleRef,
     private readonly eventStore: EventStore,
     private readonly event$: EventBus,
-    private readonly viewEventsBus: ViewEventBus, // streamPrefix: string, // eventSerializers: EventSerializers,
+    private readonly viewEventsBus: ViewEventBus,
   ) {
     super(commandBus, moduleRef);
-    // this.streamPrefix = streamPrefix;
-    // this.eventSerializers = eventSerializers;
   }
 
   async onModuleInit(): Promise<void> {
     this.logger.debug('onModuleInit');
     const aggregates = StoreEventMetadataStorage.getAggregates();
     const serializers = StoreEventMetadataStorage.getSerializers();
-    console.log({ aggregates, serializers });
-    this.logger.debug(`${JSON.stringify(serializers)}`);
+
+    this.logger.debug(`${JSON.stringify({ aggregates, serializers })}`);
 
     aggregates.forEach(agg => {
       this.eventStore.setSerializers(agg, serializers[agg]);
@@ -44,22 +40,9 @@ export class StoreEventBus extends EventBus implements IEventBus {
       subscriber.getAll(); // from checkpoint xxx comes later
       subscriber.subscribe();
     });
-
-    // todo: loop over aggr
-
-    // this.eventStore.setSerializers(this.streamPrefix, this.eventSerializers);
-    // const subscriber = new EventStoreEventSubscriber(
-    //   this.eventStore,
-    //   this.viewEventsBus,
-    //   this.streamPrefix,
-    // );
-    // subscriber.bridgeEventsTo(this.event$.subject$);
-    // await subscriber.getAll(); // from checkpoint xxx comes later
-    // subscriber.subscribe();
   }
 
   publish<T extends IEvent>(event: T): void {
-    this.logger.debug(`publish ${event}`);
     const storableEvent = event as any as StorableEvent;
     if (
       storableEvent.id === undefined ||
