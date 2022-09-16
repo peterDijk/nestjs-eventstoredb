@@ -1,6 +1,6 @@
 {
   "name": "@peterdijk/nestjs-eventstoredb",
-  "version": "0.6.1",
+  "version": "0.7.2",
   "description": "NestJS module for implementing Event Sourcing using EventStoreDB",
   "main": "index.js",
   "scripts": {
@@ -13,16 +13,20 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --fix && npm run prettier",
     "prettier": "prettier --write 'src/*.{ts, js}'"
   },
+  "peerDependencies": {
+    "@nestjs/common": "^9.0.11",
+    "@nestjs/core": "^9.0.11",
+    "@nestjs/cqrs": "^9.0.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.5.6",
+    "@nestjs/platform-express": "^9.0.11"
+  },
   "dependencies": {
     "@eventstore/db-client": "^4.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
-    "@nestjs/common": "^9.0.11",
-    "@nestjs/core": "^9.0.11",
-    "@nestjs/cqrs": "^9.0.1",
-    "@nestjs/platform-express": "^9.0.11",
     "@types/node": "^18.7.18",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
@@ -31,8 +35,6 @@
     "eslint-plugin-import": "^2.26.0",
     "husky": "^8.0.1",
     "prettier": "^2.7.1",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.5.6",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",
     "typescript": "^4.8.3"
