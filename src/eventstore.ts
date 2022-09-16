@@ -150,7 +150,7 @@ export class EventStore {
         try {
           await viewEventsBus.publish(parsedEvent);
         } catch (err) {
-          throw Error('Error updating projection');
+          throw Error('Error publishing on viewEventBus');
         }
       }
     }

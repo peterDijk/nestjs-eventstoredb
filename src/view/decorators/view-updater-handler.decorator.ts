@@ -7,6 +7,7 @@ export function ViewUpdaterHandler(
   event: Type<IEvent>,
 ): (target: Type<IViewUpdater<IEvent>>) => void {
   const logger = new Logger(ViewUpdaterHandler.name);
+  logger.debug(`updater decorator`);
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   return (target: Type<IViewUpdater<IEvent>>) => {
     ViewUpdaters.add(event.name, target);
