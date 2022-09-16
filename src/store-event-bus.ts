@@ -41,6 +41,7 @@ export class StoreEventBus extends EventBus implements IEventBus {
 
   publish<T extends IEvent>(event: T): void {
     const storableEvent = event as any as StorableEvent;
+    this.logger.debug(`publishing event: ${storableEvent.eventName}`);
     if (
       storableEvent.id === undefined ||
       storableEvent.eventVersion === undefined ||

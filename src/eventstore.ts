@@ -117,6 +117,7 @@ export class EventStore {
         }
       } catch (err) {}
 
+      this.logger.debug(`going to appendToStream`);
       await this.eventstore.appendToStream(
         this.getAggregateId(streamPrefix, eventDeserialized.id),
         jsonEvent({
@@ -128,6 +129,7 @@ export class EventStore {
         }),
         { expectedRevision: revision },
       );
+      this.logger.debug(`done appendToStream`);
     });
   }
 
