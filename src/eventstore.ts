@@ -27,9 +27,10 @@ export class EventStore {
 
   constructor(options: EventStoreOptions) {
     try {
-      this.eventstore = EventStoreDBClient.connectionString(
-        options.eventStoreUrl,
-      );
+      this.eventstore = new EventStoreDBClient({
+        endpoint: options.eventStoreUrl,
+      });
+      this.logger.debug('EventStore connection successful');
       this.eventStoreLaunched = true;
     } catch (err) {
       this.eventStoreLaunched = false;

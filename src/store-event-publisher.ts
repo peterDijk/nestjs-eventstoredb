@@ -10,7 +10,9 @@ export interface Constructor<T> {
 export class StoreEventPublisher {
   private logger = new Logger(StoreEventBus.name);
 
-  constructor(private readonly eventBus: StoreEventBus) {}
+  constructor(private readonly eventBus: StoreEventBus) {
+    this.logger.debug('constructed');
+  }
 
   mergeClassContext<T extends Constructor<AggregateRoot>>(metatype: T): T {
     const eventBus = this.eventBus;

@@ -23,6 +23,8 @@ export class StoreEventBus extends EventBus implements IEventBus {
   }
 
   async onModuleInit(): Promise<void> {
+    this.logger.debug(`onModuleInit`);
+
     const aggregates = StoreEventMetadataStorage.getAggregates();
     const serializers = StoreEventMetadataStorage.getSerializers();
 

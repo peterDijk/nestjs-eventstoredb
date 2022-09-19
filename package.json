@@ -1,6 +1,6 @@
 {
   "name": "@peterdijk/nestjs-eventstoredb",
-  "version": "0.7.33",
+  "version": "0.7.34",
   "description": "NestJS module for implementing Event Sourcing using EventStoreDB",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,12 @@
     "@eventstore/db-client": "^4.0.0"
   },
   "devDependencies": {
+    "@nestjs/common": "^9.0.11",
+    "@nestjs/core": "^9.0.11",
+    "@nestjs/cqrs": "^9.0.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.5.6",
+    "@nestjs/platform-express": "^9.0.11",
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
     "@types/node": "^18.7.18",
