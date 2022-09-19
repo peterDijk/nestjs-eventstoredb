@@ -10,9 +10,7 @@ export interface Constructor<T> {
 export class StoreEventPublisher {
   private logger = new Logger(StoreEventPublisher.name);
 
-  constructor(private readonly eventBus: StoreEventBus) {
-    this.logger.debug('constructed');
-  }
+  constructor(private readonly eventBus: StoreEventBus) {}
 
   mergeClassContext<T extends Constructor<AggregateRoot>>(metatype: T): T {
     const eventBus = this.eventBus;
@@ -20,18 +18,21 @@ export class StoreEventPublisher {
       publish(event: IEvent) {
         eventBus.publish(event);
       }
+
+      publishAll(events: IEvent[]) {
+        eventBus.publishAll(events);
+      }
     };
   }
 
   mergeObjectContext<T extends AggregateRoot>(object: T): T {
-    this.logger.log('mergeObjectContext');
-    console.log(object);
     const eventBus = this.eventBus;
+    object.publish = (event: IEvent) => {
+      eventBus.publish(event);
+    };
+
     object.publishAll = (events: IEvent[]) => {
-      events.forEach(event => {
-        this.logger.log(`on to eventBus: ${event}`);
-        eventBus.publish(event);
-      });
+      eventBus.publishAll(events);
     };
     return object;
   }

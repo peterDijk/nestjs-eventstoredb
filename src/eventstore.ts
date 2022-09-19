@@ -26,15 +26,16 @@ export class EventStore {
   private logger = new Logger(EventStore.name);
 
   constructor(options: EventStoreOptions) {
-    this.logger.debug(options);
     try {
       this.eventstore = new EventStoreDBClient(
         {
           endpoint: { address: options.address, port: options.port },
         },
-        { insecure: true },
+        { insecure: options.insecure },
       );
-      this.logger.debug('EventStore connection successful');
+      if (this.eventstore) {
+        this.logger.debug('EventStore connection successful');
+      }
       this.eventStoreLaunched = true;
     } catch (err) {
       this.eventStoreLaunched = false;
@@ -49,7 +50,7 @@ export class EventStore {
     aggregate: string,
     eventSerializers: EventSerializers,
   ): void {
-    this.logger.debug(`setting serializers for ${aggregate}`);
+    this.logger.debug(`Setting serializers for ${aggregate}`);
     this.aggregateEventSerializers[aggregate] = eventSerializers;
   }
 
