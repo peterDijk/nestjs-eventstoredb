@@ -26,6 +26,7 @@ export class EventStore {
   private logger = new Logger(EventStore.name);
 
   constructor(options: EventStoreOptions) {
+    this.logger.debug(options);
     try {
       this.eventstore = new EventStoreDBClient({
         endpoint: options.eventStoreUrl,
