@@ -1,3 +1,4 @@
 export interface EventStoreOptions {
-  eventStoreUrl: string;
+  address: string;
+  port: number;
 }

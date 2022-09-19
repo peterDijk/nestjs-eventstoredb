@@ -16,7 +16,7 @@ import { streamNameFilter } from '@eventstore/db-client';
 })
 export class EventStoreModule {
   static forRoot(options: EventStoreOptions): DynamicModule {
-    Logger.debug(`testing v0.7.34`);
+    Logger.debug(`testing v0.7.35`);
     return {
       module: EventStoreModule,
       providers: [
