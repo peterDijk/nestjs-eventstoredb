@@ -8,7 +8,7 @@ export interface Constructor<T> {
 
 @Injectable()
 export class StoreEventPublisher {
-  private logger = new Logger(StoreEventBus.name);
+  private logger = new Logger(StoreEventPublisher.name);
 
   constructor(private readonly eventBus: StoreEventBus) {
     this.logger.debug('constructed');
@@ -25,10 +25,13 @@ export class StoreEventPublisher {
 
   mergeObjectContext<T extends AggregateRoot>(object: T): T {
     this.logger.log('mergeObjectContext');
+    console.log(object);
     const eventBus = this.eventBus;
-    object.publish = (event: IEvent) => {
-      this.logger.log(`on to eventBus: ${event}`);
-      eventBus.publish(event);
+    object.publishAll = (events: IEvent[]) => {
+      events.forEach(event => {
+        this.logger.log(`on to eventBus: ${event}`);
+        eventBus.publish(event);
+      });
     };
     return object;
   }
