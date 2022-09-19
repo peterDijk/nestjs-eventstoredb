@@ -156,6 +156,7 @@ export class EventStore {
         try {
           await viewEventsBus.publish(parsedEvent);
         } catch (err) {
+          this.logger.debug(err);
           throw Error('Error publishing on viewEventBus');
         }
       }

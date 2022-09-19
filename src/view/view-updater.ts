@@ -17,12 +17,12 @@ export class ViewUpdater {
   async run<T extends IEvent>(event: T): Promise<void> {
     const updater = ViewUpdaters.get(event.constructor.name);
     if (updater) {
-      // if (!this.instances.has(updater)) {
-      //   this.instances.set(
-      //     updater,
-      //     this.moduleRef.get(updater.name, { strict: false }),
-      //   );
-      // }
+      if (!this.instances.has(updater)) {
+        this.instances.set(
+          updater,
+          this.moduleRef.get(updater.name, { strict: false }),
+        );
+      }
       this.logger.debug(
         `found updater for event ${event.constructor.name} - calling handle method`,
       );
