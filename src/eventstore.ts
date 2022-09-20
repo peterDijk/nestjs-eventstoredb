@@ -24,6 +24,10 @@ export class EventStore {
   private readonly config;
   private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
+  private lastPositionStorage?: {
+    set: (stream: string, position: Object) => void;
+    get: (stream: string) => Object;
+  };
 
   constructor(options: EventStoreOptions) {
     try {
@@ -39,6 +43,10 @@ export class EventStore {
       this.eventStoreLaunched = true;
     } catch (err) {
       this.eventStoreLaunched = false;
+    }
+
+    if (options.lastPositionStorage) {
+      this.lastPositionStorage = options.lastPositionStorage;
     }
   }
 
@@ -144,6 +152,8 @@ export class EventStore {
     streamPrefix: string,
   ): Promise<void> {
     this.logger.log('Replaying all events to build projection');
+    const position = this.lastPositionStorage?.get(streamPrefix);
+    this.logger.log({ position });
     // maybe not readAll
     const events = this.eventstore.readAll();
 
@@ -180,6 +190,9 @@ export class EventStore {
       const parsedEvent = this.aggregateEventSerializers[streamPrefix][
         data.event.type
       ](data.event.data);
+
+      const position = data.event.position;
+      this.lastPositionStorage?.set(streamPrefix, position);
 
       // throw the parsed event on the main NestJS event bus (it will be picked up by handlers that are decorated by @EventsHandler)
       if (bridge) {
