@@ -151,8 +151,8 @@ export class EventStore {
   toPosition(position: { commit: string; prepare: string }): Position | null {
     if (!position) return null;
     return {
-      commit: BigInt(position.commit),
-      prepare: BigInt(position.prepare),
+      commit: BigInt(parseInt(position.commit)),
+      prepare: BigInt(parseInt(position.prepare)),
     };
   }
 
@@ -163,7 +163,12 @@ export class EventStore {
     this.logger.log('Replaying all events to build projection');
     const position = await this.lastPositionStorage?.get(streamPrefix);
     const posBigInt = this.toPosition(position as any);
-    this.logger.log({ position, posBigInt });
+    this.logger.log({
+      position,
+      posBigInt,
+      typeof_commit: typeof posBigInt?.commit,
+    });
+
     // read from above position
     // maybe not readAll
     const events = this.eventstore.readAll({
