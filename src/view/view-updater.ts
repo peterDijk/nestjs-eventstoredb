@@ -12,26 +12,17 @@ export class ViewUpdater {
   >();
   private logger = new Logger(ViewUpdater.name);
 
-  constructor(private moduleRef: ModuleRef) {
-    this.logger.debug(moduleRef);
-  }
+  constructor(private moduleRef: ModuleRef) {}
 
   async run<T extends IEvent>(event: T): Promise<void> {
     this.logger.debug(`running ViewUpdater for ${event.constructor.name}`);
     const updater = ViewUpdaters.get(event.constructor.name);
-    this.logger.debug(`updater: ${updater}`);
     if (updater) {
       if (!this.instances.has(updater)) {
         try {
-          this.logger.debug(`not in private instances yet`);
-          this.logger.debug(
-            `moduleRef: ${this.moduleRef}; updater.name: ${updater.name}`,
-          );
-
-          const moduleUpdater = await this.moduleRef.get(updater.name, {
+          const moduleUpdater = this.moduleRef.get(updater, {
             strict: false,
           });
-          this.logger.debug(moduleUpdater);
           this.instances.set(updater, moduleUpdater);
         } catch (err) {
           this.logger.debug(err);
