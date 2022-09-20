@@ -24,15 +24,29 @@ export class EventStore {
   private readonly config;
   private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
+  private lastPositionStorage?: {
+    set: (stream: string, position: Object) => void;
+    get: (stream: string) => Object;
+  };
 
   constructor(options: EventStoreOptions) {
     try {
-      this.eventstore = EventStoreDBClient.connectionString(
-        options.eventStoreUrl,
+      this.eventstore = new EventStoreDBClient(
+        {
+          endpoint: { address: options.address, port: options.port },
+        },
+        { insecure: options.insecure },
       );
+      if (this.eventstore) {
+        this.logger.debug('EventStore connection successful');
+      }
       this.eventStoreLaunched = true;
     } catch (err) {
       this.eventStoreLaunched = false;
+    }
+
+    if (options.lastPositionStorage) {
+      this.lastPositionStorage = options.lastPositionStorage;
     }
   }
 
@@ -44,7 +58,7 @@ export class EventStore {
     aggregate: string,
     eventSerializers: EventSerializers,
   ): void {
-    this.logger.debug(`setting serializers for ${aggregate}`);
+    this.logger.debug(`Setting serializers for ${aggregate}`);
     this.aggregateEventSerializers[aggregate] = eventSerializers;
   }
 
@@ -117,6 +131,7 @@ export class EventStore {
         }
       } catch (err) {}
 
+      this.logger.debug(`going to appendToStream`);
       await this.eventstore.appendToStream(
         this.getAggregateId(streamPrefix, eventDeserialized.id),
         jsonEvent({
@@ -128,6 +143,7 @@ export class EventStore {
         }),
         { expectedRevision: revision },
       );
+      this.logger.debug(`done appendToStream`);
     });
   }
 
@@ -136,6 +152,8 @@ export class EventStore {
     streamPrefix: string,
   ): Promise<void> {
     this.logger.log('Replaying all events to build projection');
+    const position = this.lastPositionStorage?.get(streamPrefix);
+    this.logger.log({ position });
     // maybe not readAll
     const events = this.eventstore.readAll();
 
@@ -148,7 +166,8 @@ export class EventStore {
         try {
           await viewEventsBus.publish(parsedEvent);
         } catch (err) {
-          throw Error('Error updating projection');
+          this.logger.debug(err);
+          throw Error('Error publishing on viewEventBus');
         }
       }
     }
@@ -171,6 +190,9 @@ export class EventStore {
       const parsedEvent = this.aggregateEventSerializers[streamPrefix][
         data.event.type
       ](data.event.data);
+
+      const position = data.event.position;
+      this.lastPositionStorage?.set(streamPrefix, position);
 
       // throw the parsed event on the main NestJS event bus (it will be picked up by handlers that are decorated by @EventsHandler)
       if (bridge) {

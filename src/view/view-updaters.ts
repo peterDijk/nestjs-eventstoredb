@@ -1,10 +1,10 @@
 import { IEvent } from '@nestjs/cqrs';
 import { IViewUpdater } from './interfaces/view-updater';
 import { Type, Logger } from '@nestjs/common';
-import { ViewUpdater } from './view-updater';
 
 export class ViewUpdaters {
   private static updaters = new Map<string, Type<IViewUpdater<IEvent>>>();
+  private static logger = new Logger(ViewUpdaters.name);
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   static add(name: string, handler: Type<IViewUpdater<IEvent>>) {

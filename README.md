@@ -49,7 +49,20 @@ import { EventStoreModule } from '@peterdijk/nestjs-eventstoredb';
 @Module({
   imports: [
     EventStoreModule.forRoot({
-      eventStoreUrl: 'esdb://eventstore.db:2113',
+      address: '0.0.0.0',
+      port: 2113,
+      insecure: true,
+      lastPositionStorage: {
+        set: (stream: string, position: Object) => {
+          // TODO implement db connection
+          console.log('setting last position', { stream, position });
+        },
+        get: (stream: string) => {
+          // TODO implement db connection
+          console.log('getting last position for: ', { stream });
+          return {};
+        },
+      },
     }),
   ],
 })
