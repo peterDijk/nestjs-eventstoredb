@@ -15,7 +15,9 @@ export class ViewUpdater {
   constructor(private moduleRef: ModuleRef) {}
 
   async run<T extends IEvent>(event: T): Promise<void> {
+    this.logger.debug(`running ViewUpdater for ${event.constructor.name}`);
     const updater = ViewUpdaters.get(event.constructor.name);
+    this.logger.debug(`updater: ${updater}`);
     if (updater) {
       if (!this.instances.has(updater)) {
         this.instances.set(
