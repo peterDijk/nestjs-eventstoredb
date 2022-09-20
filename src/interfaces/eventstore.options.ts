@@ -1,3 +1,5 @@
+import { Position } from '@eventstore/db-client';
+
 export interface EventStoreOptions {
   address: string;
   port: number;

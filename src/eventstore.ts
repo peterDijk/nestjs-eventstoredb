@@ -26,7 +26,7 @@ export class EventStore {
   private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
   private lastPositionStorage?: {
-    set: (stream: string, position: Position) => Promise<void>;
+    set: (stream: string, position: Object) => Promise<void>;
     get: (stream: string) => Promise<Object>;
   };
 
@@ -148,17 +148,26 @@ export class EventStore {
     });
   }
 
+  toPosition(position: { commit: string; prepare: string }): Position | null {
+    if (!position) return null;
+    return {
+      commit: BigInt(position.commit),
+      prepare: BigInt(position.prepare),
+    };
+  }
+
   async getAll(
     viewEventsBus: ViewEventBus,
     streamPrefix: string,
   ): Promise<void> {
     this.logger.log('Replaying all events to build projection');
     const position = await this.lastPositionStorage?.get(streamPrefix);
-    this.logger.log({ position });
+    const posBigInt = this.toPosition(position as any);
+    this.logger.log({ position, posBigInt });
     // read from above position
     // maybe not readAll
     const events = this.eventstore.readAll({
-      fromPosition: position as Position,
+      fromPosition: posBigInt ?? START,
     });
 
     for await (const { event } of events) {
