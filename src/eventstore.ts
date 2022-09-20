@@ -6,6 +6,7 @@ import {
   FORWARDS,
   jsonEvent,
   NO_STREAM,
+  Position,
   START,
   streamNameFilter,
 } from '@eventstore/db-client';
@@ -25,8 +26,8 @@ export class EventStore {
   private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
   private lastPositionStorage?: {
-    set: (stream: string, position: Object) => void;
-    get: (stream: string) => Object;
+    set: (stream: string, position: Position) => Promise<void>;
+    get: (stream: string) => Promise<Object>;
   };
 
   constructor(options: EventStoreOptions) {
@@ -152,10 +153,13 @@ export class EventStore {
     streamPrefix: string,
   ): Promise<void> {
     this.logger.log('Replaying all events to build projection');
-    const position = this.lastPositionStorage?.get(streamPrefix);
+    const position = await this.lastPositionStorage?.get(streamPrefix);
     this.logger.log({ position });
+    // read from above position
     // maybe not readAll
-    const events = this.eventstore.readAll();
+    const events = this.eventstore.readAll({
+      fromPosition: position as Position,
+    });
 
     for await (const { event } of events) {
       const parsedEvent = this.aggregateEventSerializers[streamPrefix][

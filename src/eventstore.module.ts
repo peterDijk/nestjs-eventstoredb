@@ -16,13 +16,35 @@ import { streamNameFilter } from '@eventstore/db-client';
 })
 export class EventStoreModule {
   static forRoot(options: EventStoreOptions): DynamicModule {
-    Logger.debug(`LOCAL`);
+    Logger.debug(`forRoot`);
     return {
       module: EventStoreModule,
       providers: [
         {
           provide: EventStore,
           useValue: new EventStore(options),
+        },
+      ],
+      exports: [EventStore],
+      global: true,
+    };
+  }
+
+  static async forRootAsync(
+    options: EventStoreOptions,
+  ): Promise<DynamicModule> {
+    Logger.debug(`forRootAsync`);
+    const positionStorage = await options.lastPositionStorageFactory();
+
+    return {
+      module: EventStoreModule,
+      providers: [
+        {
+          provide: EventStore,
+          useValue: new EventStore({
+            ...options,
+            lastPositionStorage: positionStorage,
+          }),
         },
       ],
       exports: [EventStore],
