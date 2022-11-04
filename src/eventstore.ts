@@ -161,21 +161,29 @@ export class EventStore {
     streamPrefix: string,
   ): Promise<void> {
     this.logger.log('Replaying all events to build projection');
-    const position = await this.lastPositionStorage?.get(streamPrefix);
-    const posBigInt = this.toPosition(position as any);
-    this.logger.log({
-      position,
-      posBigInt,
-      typeof_commit: typeof posBigInt?.commit,
-    });
+    const lastStoredPosition = await this.lastPositionStorage?.get(
+      streamPrefix,
+    );
+    const lastStoredPositionBigInt = this.toPosition(lastStoredPosition as any);
 
     // read from above position
     // maybe not readAll
     const events = this.eventstore.readAll({
-      fromPosition: posBigInt ?? START,
+      direction: FORWARDS,
+      fromPosition: lastStoredPositionBigInt ?? START,
     });
 
+    let lastReadPosition: Position;
+
     for await (const { event } of events) {
+      if (
+        event.position.commit === lastStoredPositionBigInt.commit &&
+        event.position.prepare === lastStoredPositionBigInt.prepare
+      ) {
+        this.logger.debug('Skip it, this was the last event I stored');
+        continue;
+      }
+
       const parsedEvent = this.aggregateEventSerializers[streamPrefix][
         event.type
       ]?.(event.data);
@@ -183,12 +191,19 @@ export class EventStore {
       if (parsedEvent) {
         try {
           await viewEventsBus.publish(parsedEvent);
+          lastReadPosition = event.position;
         } catch (err) {
           this.logger.debug(err);
           throw Error('Error publishing on viewEventBus');
         }
       }
     }
+
+    if (lastReadPosition) {
+      await this.lastPositionStorage.set(streamPrefix, lastReadPosition);
+      this.logger.debug(`Stored last read position: ${lastReadPosition}`);
+    }
+
     this.logger.log(
       `Done parsing all past events to projection bus for '${streamPrefix}'`,
     );
