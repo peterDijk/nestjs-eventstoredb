@@ -177,8 +177,8 @@ export class EventStore {
 
     for await (const { event } of events) {
       if (
-        event.position.commit === lastStoredPositionBigInt.commit &&
-        event.position.prepare === lastStoredPositionBigInt.prepare
+        event.position.commit === lastStoredPositionBigInt?.commit &&
+        event.position.prepare === lastStoredPositionBigInt?.prepare
       ) {
         this.logger.debug('Skip it, this was the last event I stored');
         continue;
