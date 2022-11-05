@@ -6,6 +6,7 @@ import {
   FORWARDS,
   jsonEvent,
   NO_STREAM,
+  Position,
   START,
   streamNameFilter,
 } from '@eventstore/db-client';
@@ -25,8 +26,8 @@ export class EventStore {
   private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
   private lastPositionStorage?: {
-    set: (stream: string, position: Object) => void;
-    get: (stream: string) => Object;
+    set: (stream: string, position: Object) => Promise<void>;
+    get: (stream: string) => Promise<Object>;
   };
 
   constructor(options: EventStoreOptions) {
@@ -147,17 +148,42 @@ export class EventStore {
     });
   }
 
+  toPosition(position: { commit: string; prepare: string }): Position | null {
+    if (!position) return null;
+    return {
+      commit: BigInt(parseInt(position.commit)),
+      prepare: BigInt(parseInt(position.prepare)),
+    };
+  }
+
   async getAll(
     viewEventsBus: ViewEventBus,
     streamPrefix: string,
   ): Promise<void> {
     this.logger.log('Replaying all events to build projection');
-    const position = this.lastPositionStorage?.get(streamPrefix);
-    this.logger.log({ position });
+    const lastStoredPosition = await this.lastPositionStorage?.get(
+      streamPrefix,
+    );
+    const lastStoredPositionBigInt = this.toPosition(lastStoredPosition as any);
+
+    // read from above position
     // maybe not readAll
-    const events = this.eventstore.readAll();
+    const events = this.eventstore.readAll({
+      direction: FORWARDS,
+      fromPosition: lastStoredPositionBigInt ?? START,
+    });
+
+    let lastReadPosition: Position;
 
     for await (const { event } of events) {
+      if (
+        event.position.commit === lastStoredPositionBigInt?.commit &&
+        event.position.prepare === lastStoredPositionBigInt?.prepare
+      ) {
+        this.logger.debug('Skip it, this was the last event I stored');
+        continue;
+      }
+
       const parsedEvent = this.aggregateEventSerializers[streamPrefix][
         event.type
       ]?.(event.data);
@@ -165,12 +191,19 @@ export class EventStore {
       if (parsedEvent) {
         try {
           await viewEventsBus.publish(parsedEvent);
+          lastReadPosition = event.position;
         } catch (err) {
           this.logger.debug(err);
           throw Error('Error publishing on viewEventBus');
         }
       }
     }
+
+    if (lastReadPosition) {
+      await this.lastPositionStorage.set(streamPrefix, lastReadPosition);
+      this.logger.debug(`Stored last read position: ${lastReadPosition}`);
+    }
+
     this.logger.log(
       `Done parsing all past events to projection bus for '${streamPrefix}'`,
     );
