@@ -6,10 +6,6 @@ import { EventStore } from './eventstore';
 import { ViewEventBus } from './view';
 
 export class EventStoreEventSubscriber implements IMessageSource {
-  private client: EventStoreDBClient;
-  // private bridge: Subject<any>;
-  public hasBridge = false;
-
   private logger = new Logger(EventStoreEventSubscriber.name);
 
   constructor(
@@ -19,21 +15,13 @@ export class EventStoreEventSubscriber implements IMessageSource {
   ) {}
 
   async getAll(): Promise<void> {
-    await this.eventStore.getAll(this.viewEventBus, this.streamPrefix);
+    await this.eventStore.getAll(this.streamPrefix);
     // TODO: getAll now gets all events for all streams for every stream!
   }
 
   subscribe(): void {
-    // if (this.bridge) {
-    this.eventStore.subscribe(
-      this.streamPrefix,
-      // this.bridge,
-      this.viewEventBus,
-    );
-    // }
+    this.eventStore.subscribe(this.streamPrefix);
   }
 
-  bridgeEventsTo<T extends IEvent>(subject: Subject<T>): void {
-    // this.bridge = subject;
-  }
+  bridgeEventsTo<T extends IEvent>(subject: Subject<T>): void {}
 }

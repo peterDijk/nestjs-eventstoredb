@@ -23,7 +23,6 @@ export class EventStore {
   private aggregateEventSerializers: {
     [aggregate: string]: EventSerializers;
   } = {};
-  private readonly config;
   private eventStoreLaunched = false;
   private logger = new Logger(EventStore.name);
   private lastPositionStorage?: {
@@ -31,7 +30,7 @@ export class EventStore {
     get: (stream: string) => Promise<Object>;
   };
   private viewEventBus: ViewEventBus;
-  private bridge: Subject<any>;
+  private bridge: Subject<any>; // the main NestJS Event Bus
 
   constructor(options: EventStoreOptions) {
     try {
@@ -78,7 +77,7 @@ export class EventStore {
   //   return this.config ? this.config[aggregate] : null;
   // }
 
-  public async getEvents(
+  public async getEventsForAggregate(
     aggregate: string,
     id: string,
   ): Promise<{
@@ -167,57 +166,48 @@ export class EventStore {
     };
   }
 
-  async getPropertyByKeyValueFromCategory(
-    streamPrefix: string,
-    searchEventName: string,
-    searchProperty: string,
-    searchValue: string,
-    requestProperty: string,
-  ): Promise<unknown> {
-    this.logger.debug('getPropertyByKeyValueFromStream');
-
+  async getPropertyByKeyValueFromEvents<T>({
+    streamPrefix,
+    searchEventName,
+    searchProperty,
+    searchValue,
+    requestProperty,
+  }: {
+    streamPrefix: string;
+    searchEventName?: string;
+    searchProperty: string;
+    searchValue: string;
+    requestProperty: string;
+  }): Promise<T> {
     try {
-      this.logger.debug(`streamPrefix: ${streamPrefix}`);
-      const events = this.eventstore.readStream(`$ce-${streamPrefix}`, {
+      const stream = searchEventName
+        ? `$et-${searchEventName}`
+        : `$ce-${streamPrefix}`;
+
+      const events = this.eventstore.readStream(stream, {
         direction: FORWARDS,
         fromRevision: START,
         resolveLinkTos: true,
       });
 
-      // - find key:value by property in all events from stream
-
       for await (const { event } of events) {
-        this.logger.debug(`event: ${event.type}`);
-        this.logger.debug(`event: ${event.streamId}`);
-
+        this.logger.debug(`event: ${event.type}, streamId: ${event.streamId}`);
         const parsedEvent = this.aggregateEventSerializers[streamPrefix][
           event.type
         ]?.(event.data);
 
-        if (parsedEvent) {
-          this.logger.debug(parsedEvent.eventName);
-          if (parsedEvent.eventName !== searchEventName) {
-            continue;
-          }
-
-          if (parsedEvent[searchProperty] === searchValue) {
-            const requestValue = parsedEvent[requestProperty];
-
-            return requestValue;
-          }
+        if (parsedEvent && parsedEvent[searchProperty] === searchValue) {
+          return parsedEvent[requestProperty];
         }
       }
-      this.logger.debug('end of for loop');
     } catch (err) {
       this.logger.error(err);
     }
-    return 'none';
+
+    throw new Error('Nothing found with arguments');
   }
 
-  async getAll(
-    viewEventsBus: ViewEventBus,
-    streamPrefix: string,
-  ): Promise<void> {
+  async getAll(streamPrefix: string): Promise<void> {
     this.logger.log('Replaying all events to build projection');
     const lastStoredPosition = await this.lastPositionStorage?.get(
       streamPrefix,
@@ -238,7 +228,9 @@ export class EventStore {
         event.position.commit === lastStoredPositionBigInt?.commit &&
         event.position.prepare === lastStoredPositionBigInt?.prepare
       ) {
-        this.logger.debug('Skip it, this was the last event I stored');
+        this.logger.debug(
+          'Skip it, this was the last event that was processed',
+        );
         continue;
       }
 
@@ -268,11 +260,7 @@ export class EventStore {
     );
   }
 
-  subscribe(
-    streamPrefix: string,
-    // bridge: Subject<any>,
-    viewEventsBus: ViewEventBus,
-  ): void {
+  subscribe(streamPrefix: string): void {
     const filter = streamNameFilter({ prefixes: [streamPrefix] });
     const subscription = this.eventstore.subscribeToAll({
       filter,
