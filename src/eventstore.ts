@@ -14,6 +14,7 @@ import { IEvent } from '@nestjs/cqrs';
 import { Subject } from 'rxjs';
 import { ViewEventBus } from './view';
 import { Logger } from '@nestjs/common';
+import { parse } from 'path';
 
 export class EventStore {
   private readonly eventstore: EventStoreDBClient;
@@ -29,6 +30,8 @@ export class EventStore {
     set: (stream: string, position: Object) => Promise<void>;
     get: (stream: string) => Promise<Object>;
   };
+  private viewEventBus: ViewEventBus;
+  private bridge: Subject<any>;
 
   constructor(options: EventStoreOptions) {
     try {
@@ -61,6 +64,14 @@ export class EventStore {
   ): void {
     this.logger.debug(`Setting serializers for ${aggregate}`);
     this.aggregateEventSerializers[aggregate] = eventSerializers;
+  }
+
+  public setViewEventBus(viewEventBus: ViewEventBus) {
+    this.viewEventBus = viewEventBus;
+  }
+
+  public setBridge(bridge: Subject<any>) {
+    this.bridge = bridge;
   }
 
   // public getSnapshotInterval(aggregate: string): number | null {
@@ -156,6 +167,47 @@ export class EventStore {
     };
   }
 
+  async getPropertyByKeyValueFromStream(
+    streamPrefix: string,
+    searchEventName: string,
+    searchProperty: string,
+    searchValue: string,
+    requestProperty: string,
+  ): Promise<unknown> {
+    this.logger.debug('getPropertyByKeyValueFromStream');
+
+    try {
+      const events = this.eventstore.readStream(streamPrefix, {
+        direction: FORWARDS,
+        fromRevision: START,
+      });
+
+      // - find key:value by property in all events from stream
+
+      for await (const { event } of events) {
+        // this is from the user stream! why? because we're only serializing with current streamPrefix. So all events are still read
+        const parsedEvent = this.aggregateEventSerializers[streamPrefix][
+          event.type
+        ]?.(event.data);
+
+        if (parsedEvent) {
+          this.logger.debug(parsedEvent.eventName);
+          if (parsedEvent.eventName !== searchEventName) {
+            continue;
+          }
+
+          if (parsedEvent[searchProperty] === searchValue) {
+            const requestValue = parsedEvent[requestProperty];
+
+            return requestValue;
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.error;
+    }
+  }
+
   async getAll(
     viewEventsBus: ViewEventBus,
     streamPrefix: string,
@@ -189,8 +241,9 @@ export class EventStore {
       ]?.(event.data);
 
       if (parsedEvent) {
+        this.logger.debug(parsedEvent.eventName);
         try {
-          await viewEventsBus.publish(parsedEvent);
+          await this.viewEventBus.publish(parsedEvent);
           lastReadPosition = event.position;
         } catch (err) {
           this.logger.debug(err);
@@ -211,7 +264,7 @@ export class EventStore {
 
   subscribe(
     streamPrefix: string,
-    bridge: Subject<any>,
+    // bridge: Subject<any>,
     viewEventsBus: ViewEventBus,
   ): void {
     const filter = streamNameFilter({ prefixes: [streamPrefix] });
@@ -228,12 +281,12 @@ export class EventStore {
       this.lastPositionStorage?.set(streamPrefix, position);
 
       // throw the parsed event on the main NestJS event bus (it will be picked up by handlers that are decorated by @EventsHandler)
-      if (bridge) {
-        bridge.next(parsedEvent);
+      if (this.bridge) {
+        this.bridge.next(parsedEvent);
       }
 
       // throw it onto our own ViewEventBus. Update handlers decorated with @ViewUpdaterHandler will be registered and called from the bus
-      viewEventsBus.publish(parsedEvent);
+      this.viewEventBus.publish(parsedEvent);
     });
     this.logger.log(`Subscribed to all streams with prefix '${streamPrefix}-'`);
   }
