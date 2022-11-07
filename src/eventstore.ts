@@ -167,7 +167,7 @@ export class EventStore {
     };
   }
 
-  async getPropertyByKeyValueFromStream(
+  async getPropertyByKeyValueFromCategory(
     streamPrefix: string,
     searchEventName: string,
     searchProperty: string,
@@ -177,15 +177,19 @@ export class EventStore {
     this.logger.debug('getPropertyByKeyValueFromStream');
 
     try {
-      const events = this.eventstore.readStream(streamPrefix, {
+      this.logger.debug(`streamPrefix: ${streamPrefix}`);
+      const events = this.eventstore.readStream(`$ce-${streamPrefix}`, {
         direction: FORWARDS,
         fromRevision: START,
+        resolveLinkTos: true,
       });
 
       // - find key:value by property in all events from stream
 
       for await (const { event } of events) {
-        // this is from the user stream! why? because we're only serializing with current streamPrefix. So all events are still read
+        this.logger.debug(`event: ${event.type}`);
+        this.logger.debug(`event: ${event.streamId}`);
+
         const parsedEvent = this.aggregateEventSerializers[streamPrefix][
           event.type
         ]?.(event.data);
@@ -203,9 +207,11 @@ export class EventStore {
           }
         }
       }
+      this.logger.debug('end of for loop');
     } catch (err) {
-      this.logger.error;
+      this.logger.error(err);
     }
+    return 'none';
   }
 
   async getAll(
