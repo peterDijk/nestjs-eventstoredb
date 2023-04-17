@@ -89,22 +89,26 @@ export class EventStore {
       events: IEvent[];
       snapshot?: any;
       lastRevision: AppendExpectedRevision;
-    }>(async resolve => {
-      const events = [];
-      let revision: AppendExpectedRevision = NO_STREAM;
+    }>(async (resolve, reject) => {
+      try {
+        const events = [];
+        let revision: AppendExpectedRevision = NO_STREAM;
 
-      const eventStream = await this.eventstore.readStream(
-        this.getAggregateId(aggregate, id),
-      );
+        const eventStream = await this.eventstore.readStream(
+          this.getAggregateId(aggregate, id),
+        );
 
-      for await (const resolvedEvent of eventStream) {
-        revision = resolvedEvent.event?.revision ?? revision;
-        const parsedEvent = this.aggregateEventSerializers[aggregate][
-          resolvedEvent.event.type
-        ](resolvedEvent.event.data);
-        events.push(parsedEvent);
+        for await (const resolvedEvent of eventStream) {
+          revision = resolvedEvent.event?.revision ?? revision;
+          const parsedEvent = this.aggregateEventSerializers[aggregate][
+            resolvedEvent.event.type
+          ](resolvedEvent.event.data);
+          events.push(parsedEvent);
+        }
+        resolve({ events, lastRevision: revision });
+      } catch (err) {
+        reject(err);
       }
-      resolve({ events, lastRevision: revision });
     });
   }
 
