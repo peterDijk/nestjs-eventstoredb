@@ -8,8 +8,14 @@ export class ViewUpdaters {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   static add(name: string, handler: Type<IViewUpdater<IEvent>>) {
+    this.logger.debug(`adding updater for "${name}"`);
     const existingUpdater = ViewUpdaters.updaters.get(name);
-    ViewUpdaters.updaters.set(name, [...existingUpdater, handler]);
+
+    if (existingUpdater && existingUpdater.length) {
+      ViewUpdaters.updaters.set(name, [...existingUpdater, handler]);
+    } else {
+      ViewUpdaters.updaters.set(name, [handler]);
+    }
   }
 
   static get(name: string): Type<IViewUpdater<IEvent>>[] {
